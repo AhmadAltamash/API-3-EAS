@@ -1,0 +1,357 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="fade-up">
+
+    <!-- ================= PAGE HEADER ================= -->
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+
+            <h2 class="fw-bold mb-1">
+
+                Search Buyers
+
+            </h2>
+
+            <p class="text-muted">
+
+                Search international buyers from multiple business sources.
+
+            </p>
+
+        </div>
+
+        <a href="/buyers" class="btn btn-primary">
+
+            <i class="fa-solid fa-database me-2"></i>
+
+            Buyer Database
+
+        </a>
+
+    </div>
+
+    <!-- ================= SEARCH BOX ================= -->
+
+    <div class="card mb-4">
+
+        <div class="card-header">
+
+            <i class="fa-solid fa-magnifying-glass me-2"></i>
+
+            Buyer Search
+
+        </div>
+
+        <div class="card-body">
+
+            <form method="POST">
+
+                <div class="row g-3">
+
+                    <div class="col-lg-7">
+
+                        <label class="form-label">
+
+                            Search Keyword
+
+                        </label>
+
+                        <input
+                            type="text"
+                            class="form-control"
+                            name="keyword"
+                            placeholder="Example: Rice Importers, Tea Buyers, Textile Companies"
+                            required>
+
+                    </div>
+
+                    <div class="col-lg-3">
+
+                        <label class="form-label">
+
+                            Search Source
+
+                        </label>
+
+                        <select
+                            class="form-select"
+                            name="source">
+
+                            <option value="all">
+
+                                All Sources
+
+                            </option>
+
+                            <option value="google">
+
+                                Google
+
+                            </option>
+
+                            <option value="tradeindia">
+
+                                TradeIndia
+
+                            </option>
+
+                            <option value="indiamart">
+
+                                IndiaMART
+
+                            </option>
+
+                        </select>
+
+                    </div>
+
+                    <div class="col-lg-2 d-flex align-items-end">
+
+                        <button
+                            type="submit"
+                            class="btn btn-primary w-100">
+
+                            <i class="fa-solid fa-search me-2"></i>
+
+                            Search
+
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+    <!-- ================= SEARCH RESULTS ================= -->
+
+    {% if buyers %}
+
+    <div class="card">
+
+        <div class="card-header d-flex justify-content-between align-items-center">
+
+            <div>
+
+                <i class="fa-solid fa-list me-2"></i>
+
+                Search Results
+
+            </div>
+
+            <span class="badge bg-primary">
+
+                {{ buyers|length }} Results
+
+            </span>
+
+        </div>
+
+        <div class="card-body p-0">
+
+            <div class="table-responsive">
+
+                <table class="table align-middle">
+
+                    <thead>
+
+                        <tr>
+
+                            <th>Company</th>
+
+                            <th>Country</th>
+
+                            <th>Email</th>
+
+                            <th>Website</th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                    {% for buyer in buyers %}
+
+                        <tr>
+
+                            <td>
+
+                                <strong>
+
+                                    {{ buyer.company or "-" }}
+
+                                </strong>
+
+                            </td>
+
+                            <td>
+
+                                {{ buyer.country or "-" }}
+
+                            </td>
+
+                            <td>
+
+                                {% if buyer.email %}
+
+                                    <span class="badge bg-success">
+
+                                        {{ buyer.email }}
+
+                                    </span>
+
+                                {% else %}
+
+                                    <span class="badge bg-danger">
+
+                                        Not Available
+
+                                    </span>
+
+                                {% endif %}
+
+                            </td>
+
+                            <td>
+
+                                {% if buyer.website %}
+
+                                    <a
+                                        href="{{ buyer.website }}"
+                                        target="_blank"
+                                        class="btn btn-outline-primary btn-sm">
+
+                                        <i class="fa-solid fa-globe me-1"></i>
+
+                                        Visit
+
+                                    </a>
+
+                                {% else %}
+
+                                    -
+
+                                {% endif %}
+
+                            </td>
+
+                        </tr>
+
+                    {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    {% else %}
+
+    <!-- ================= EMPTY STATE ================= -->
+
+    <div class="card">
+
+        <div class="card-body text-center py-5">
+
+            <i class="fa-solid fa-earth-americas fa-4x text-primary mb-4"></i>
+
+            <h3>
+
+                Find International Buyers
+
+            </h3>
+
+            <p class="text-muted mb-4">
+
+                Search buyers by product or business keyword using multiple sources.
+
+            </p>
+
+            <div class="row justify-content-center">
+
+                <div class="col-lg-8">
+
+                    <div class="row g-3">
+
+                        <div class="col-md-4">
+
+                            <div class="stats-card stats-primary">
+
+                                <i class="fa-solid fa-globe"></i>
+
+                                <h6>Multiple Sources</h6>
+
+                                <p class="mb-0">
+
+                                    Google, TradeIndia & IndiaMART
+
+                                </p>
+
+                            </div>
+
+                        </div>
+
+                        <div class="col-md-4">
+
+                            <div class="stats-card stats-success">
+
+                                <i class="fa-solid fa-building"></i>
+
+                                <h6>Verified Companies</h6>
+
+                                <p class="mb-0">
+
+                                    Discover potential buyers
+
+                                </p>
+
+                            </div>
+
+                        </div>
+
+                        <div class="col-md-4">
+
+                            <div class="stats-card stats-info">
+
+                                <i class="fa-solid fa-envelope"></i>
+
+                                <h6>Contact Details</h6>
+
+                                <p class="mb-0">
+
+                                    Find websites and email addresses
+
+                                </p>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    {% endif %}
+
+</div>
+
+{% endblock %}

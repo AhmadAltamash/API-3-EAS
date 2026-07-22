@@ -1,0 +1,377 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="fade-up">
+
+    <!-- ================= HEADER ================= -->
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+
+            <h2 class="fw-bold mb-1">
+
+                Buyer Database
+
+            </h2>
+
+            <p class="text-muted">
+
+                Manage, classify and enrich your international buyers.
+
+            </p>
+
+        </div>
+
+        <a href="/campaign" class="btn btn-primary">
+
+            <i class="fa-solid fa-paper-plane me-2"></i>
+
+            Email Campaign
+
+        </a>
+
+    </div>
+
+
+    <!-- ================= STATISTICS ================= -->
+
+    <div class="row g-4 mb-4">
+
+        <div class="col-xl-3 col-md-6">
+
+            <div class="stats-card stats-primary">
+
+                <i class="fa-solid fa-users"></i>
+
+                <h6>Total Buyers</h6>
+
+                <h2>{{ buyers|length }}</h2>
+
+                <small class="text-muted">
+
+                    Companies in database
+
+                </small>
+
+            </div>
+
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+
+            <div class="stats-card stats-success">
+
+                <i class="fa-solid fa-envelope"></i>
+
+                <h6>Email Available</h6>
+
+                <h2>
+
+                    {{ buyers|selectattr('email')|list|length }}
+
+                </h2>
+
+                <small class="text-muted">
+
+                    Ready for campaigns
+
+                </small>
+
+            </div>
+
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+
+            <div class="stats-card stats-warning">
+
+                <i class="fa-solid fa-robot"></i>
+
+                <h6>AI Classified</h6>
+
+                <h2>
+
+                    {{ buyers|rejectattr('category','equalto','Unknown')|list|length }}
+
+                </h2>
+
+                <small class="text-muted">
+
+                    Successfully categorized
+
+                </small>
+
+            </div>
+
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+
+            <div class="stats-card stats-info">
+
+                <i class="fa-solid fa-earth-americas"></i>
+
+                <h6>Countries</h6>
+
+                <h2>
+
+                    {{ buyers|map(attribute='country')|reject('equalto',None)|unique|list|length }}
+
+                </h2>
+
+                <small class="text-muted">
+
+                    Worldwide coverage
+
+                </small>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ================= ACTIONS ================= -->
+
+    <div class="card mb-4">
+
+        <div class="card-header">
+
+            Quick Actions
+
+        </div>
+
+        <div class="card-body">
+
+            <div class="d-flex flex-wrap gap-3">
+
+                <a
+                    href="{{ url_for('classify.classify_all') }}"
+                    class="btn btn-success">
+
+                    <i class="fa-solid fa-robot me-2"></i>
+
+                    AI Classify All
+
+                </a>
+
+                <a
+                    href="/enrich"
+                    class="btn btn-warning">
+
+                    <i class="fa-solid fa-address-book me-2"></i>
+
+                    Enrich Contacts
+
+                </a>
+
+                <a
+                    href="/campaign"
+                    class="btn btn-primary">
+
+                    <i class="fa-solid fa-paper-plane me-2"></i>
+
+                    Start Campaign
+
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ================= BUYER TABLE ================= -->
+
+    <div class="card">
+
+        <div class="card-header d-flex justify-content-between align-items-center">
+
+            <span>
+
+                Buyer Records
+
+            </span>
+
+            <span class="badge bg-primary">
+
+                {{ buyers|length }} Buyers
+
+            </span>
+
+        </div>
+
+        <div class="card-body p-0">
+
+            <div class="table-responsive">
+
+                <table class="table align-middle">
+
+                    <thead>
+
+                        <tr>
+
+                            <th>ID</th>
+
+                            <th>Company</th>
+
+                            <th>Country</th>
+
+                            <th>Email</th>
+
+                            <th>Website</th>
+
+                            <th>Category</th>
+
+                            <th>Source</th>
+
+                            <th>Action</th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                    {% for item in buyers %}
+
+                    <tr>
+
+                        <td>
+
+                            <strong>#{{ item.id }}</strong>
+
+                        </td>
+
+                        <td>
+
+                            <strong>
+
+                                {{ item.company }}
+
+                            </strong>
+
+                        </td>
+
+                        <td>
+
+                            {{ item.country or "-" }}
+
+                        </td>
+
+                        <td>
+
+                            {% if item.email %}
+
+                                <span class="badge bg-success">
+
+                                    {{ item.email }}
+
+                                </span>
+
+                            {% else %}
+
+                                <span class="badge bg-danger">
+
+                                    No Email
+
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+                        <td>
+
+                            {% if item.website %}
+
+                                <a
+                                    href="{{ item.website }}"
+                                    target="_blank"
+                                    class="btn btn-outline-primary btn-sm">
+
+                                    <i class="fa-solid fa-globe me-1"></i>
+
+                                    Visit
+
+                                </a>
+
+                            {% else %}
+
+                                -
+
+                            {% endif %}
+
+                        </td>
+
+                        <td>
+
+                            {% if item.category=="Importer" %}
+                            <span class="badge bg-success">Importer</span>
+
+                            {% elif item.category=="Exporter" %}
+                            <span class="badge bg-primary">Exporter</span>
+
+                            {% elif item.category=="Manufacturer" %}
+                            <span class="badge bg-warning text-dark">Manufacturer</span>
+
+                            {% elif item.category=="Distributor" %}
+                            <span class="badge bg-info text-dark">Distributor</span>
+
+                            {% elif item.category=="Wholesaler" %}
+                            <span class="badge bg-secondary">Wholesaler</span>
+
+                            {% elif item.category=="Retailer" %}
+                            <span class="badge bg-dark">Retailer</span>
+
+                            {% else %}
+                            <span class="badge bg-danger">Unknown</span>
+                            {% endif %}
+
+                        </td>
+
+                        <td>
+
+                            <span class="badge bg-light text-dark">
+
+                                {{ item.source }}
+
+                            </span>
+
+                        </td>
+
+                        <td>
+
+                            <a
+                                href="{{ url_for('classify.classify', buyer_id=item.id) }}"
+                                class="btn btn-success btn-sm">
+
+                                <i class="fa-solid fa-robot me-1"></i>
+
+                                Classify
+
+                            </a>
+
+                        </td>
+
+                    </tr>
+
+                    {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

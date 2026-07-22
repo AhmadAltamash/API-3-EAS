@@ -1,0 +1,577 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="fade-up">
+
+    <!-- Header -->
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+
+            <h2 class="fw-bold mb-1">
+
+                Dashboard
+
+            </h2>
+
+            <p class="text-muted">
+
+                Welcome to the API-3 Export Automation System
+
+            </p>
+
+        </div>
+
+        <div>
+
+            <a href="/search" class="btn btn-primary">
+
+                <i class="fa-solid fa-plus me-2"></i>
+
+                Search Buyers
+
+            </a>
+
+        </div>
+
+    </div>
+
+
+    <!-- Statistics -->
+
+    <div class="row g-4">
+
+        <div class="col-xl-3 col-md-6">
+
+            <div class="stats-card stats-primary">
+
+                <i class="fa-solid fa-users"></i>
+
+                <h6>Total Buyers</h6>
+
+                <h2>{{ total_buyers }}</h2>
+
+                <small class="text-muted">
+
+                    Registered companies
+
+                </small>
+
+            </div>
+
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+
+            <div class="stats-card stats-success">
+
+                <i class="fa-solid fa-envelope"></i>
+
+                <h6>Email Available</h6>
+
+                <h2>{{ email_buyers }}</h2>
+
+                <small class="text-muted">
+
+                    Ready for campaigns
+
+                </small>
+
+            </div>
+
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+
+            <div class="stats-card stats-info">
+
+                <i class="fa-solid fa-robot"></i>
+
+                <h6>AI Classified</h6>
+
+                <h2>{{ classified_buyers }}</h2>
+
+                <small class="text-muted">
+
+                    Successfully categorized
+
+                </small>
+
+            </div>
+
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+
+            <div class="stats-card stats-warning">
+
+                <i class="fa-solid fa-paper-plane"></i>
+
+                <h6>Campaigns</h6>
+
+                <h2>{{ total_campaigns }}</h2>
+
+                <small class="text-muted">
+
+                    Emails sent
+
+                </small>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Second Row -->
+
+<div class="row mt-4">
+
+    <!-- System Health -->
+
+    <div class="col-lg-4">
+
+        <div class="card">
+
+            <div class="card-header">
+
+                <i class="fa-solid fa-chart-line me-2"></i>
+
+                System Health
+
+            </div>
+
+            <div class="card-body">
+
+                <p class="mb-2">
+
+                    Email Success Rate
+
+                </p>
+
+                <div class="progress mb-3">
+
+                    <div
+                        id="progressBar"
+                        class="progress-bar bg-success">
+                    </div>
+
+                    <script>
+                    document.getElementById("progressBar").style.width =
+                        "{{ success_rate }}%";
+                    </script>
+
+                </div>
+
+                <h4>
+
+                    {{ success_rate }}%
+
+                </h4>
+
+                <hr>
+
+                <div class="d-flex justify-content-between">
+
+                    <span>Emails Sent</span>
+
+                    <strong>{{ total_sent }}</strong>
+
+                </div>
+
+                <div class="d-flex justify-content-between mt-2">
+
+                    <span>Failed</span>
+
+                    <strong>{{ total_failed }}</strong>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Quick Actions -->
+
+    <div class="col-lg-8">
+
+        <div class="card">
+
+            <div class="card-header">
+
+                Quick Actions
+
+            </div>
+
+            <div class="card-body">
+
+                <div class="row g-3">
+
+                    <div class="col-md-3">
+
+                        <a href="/search" class="quick-action">
+
+                            <div>
+
+                                <h6>
+
+                                    Search
+
+                                </h6>
+
+                                <small>
+
+                                    Find Buyers
+
+                                </small>
+
+                            </div>
+
+                            <i class="fa-solid fa-magnifying-glass"></i>
+
+                        </a>
+
+                    </div>
+
+                    <div class="col-md-3">
+
+                        <a href="/buyers" class="quick-action">
+
+                            <div>
+
+                                <h6>
+
+                                    Buyers
+
+                                </h6>
+
+                                <small>
+
+                                    Database
+
+                                </small>
+
+                            </div>
+
+                            <i class="fa-solid fa-users"></i>
+
+                        </a>
+
+                    </div>
+
+                    <div class="col-md-3">
+
+                        <a href="/classify" class="quick-action">
+
+                            <div>
+
+                                <h6>
+
+                                    AI
+
+                                </h6>
+
+                                <small>
+
+                                    Classify
+
+                                </small>
+
+                            </div>
+
+                            <i class="fa-solid fa-robot"></i>
+
+                        </a>
+
+                    </div>
+
+                    <div class="col-md-3">
+
+                        <a href="/campaign" class="quick-action">
+
+                            <div>
+
+                                <h6>
+
+                                    Campaign
+
+                                </h6>
+
+                                <small>
+
+                                    Send Email
+
+                                </small>
+
+                            </div>
+
+                            <i class="fa-solid fa-paper-plane"></i>
+
+                        </a>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- ==========================================
+     THIRD ROW
+========================================== -->
+
+<div class="row mt-4">
+
+    <!-- Recent Campaigns -->
+
+    <div class="col-lg-7">
+
+        <div class="card">
+
+            <div class="card-header d-flex justify-content-between align-items-center">
+
+                <span>
+
+                    <i class="fa-solid fa-paper-plane me-2"></i>
+
+                    Recent Campaigns
+
+                </span>
+
+                <a href="/campaign/history" class="btn btn-sm btn-primary">
+
+                    View All
+
+                </a>
+
+            </div>
+
+            <div class="card-body p-0">
+
+                <div class="table-responsive">
+
+                    <table class="table">
+
+                        <thead>
+
+                            <tr>
+
+                                <th>Name</th>
+
+                                <th>Recipients</th>
+
+                                <th>Sent</th>
+
+                                <th>Status</th>
+
+                            </tr>
+
+                        </thead>
+
+                        <tbody>
+
+                        {% for campaign in recent_campaigns %}
+
+                            <tr>
+
+                                <td>
+
+                                    <strong>
+
+                                        {{ campaign.campaign_name }}
+
+                                    </strong>
+
+                                </td>
+
+                                <td>
+
+                                    {{ campaign.total }}
+
+                                </td>
+
+                                <td>
+
+                                    {{ campaign.sent }}
+
+                                </td>
+
+                                <td>
+
+                                    {% if campaign.failed == 0 %}
+
+                                    <span class="badge bg-success">
+
+                                        Successful
+
+                                    </span>
+
+                                    {% else %}
+
+                                    <span class="badge bg-warning">
+
+                                        Partial
+
+                                    </span>
+
+                                    {% endif %}
+
+                                </td>
+
+                            </tr>
+
+                        {% else %}
+
+                            <tr>
+
+                                <td colspan="4" class="text-center py-4">
+
+                                    No campaigns found.
+
+                                </td>
+
+                            </tr>
+
+                        {% endfor %}
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- Recent Buyers -->
+
+    <div class="col-lg-5">
+
+        <div class="card">
+
+            <div class="card-header">
+
+                <i class="fa-solid fa-users me-2"></i>
+
+                Recently Added Buyers
+
+            </div>
+
+            <div class="card-body">
+
+                {% for buyer in recent_buyers %}
+
+                <div class="d-flex justify-content-between align-items-center mb-3">
+
+                    <div>
+
+                        <strong>
+
+                            {{ buyer.company_name }}
+
+                        </strong>
+
+                        <br>
+
+                        <small class="text-muted">
+
+                            {{ buyer.country }}
+
+                        </small>
+
+                    </div>
+
+                    <div>
+
+                        {% if buyer.email %}
+
+                        <span class="badge bg-success">
+
+                            Email
+
+                        </span>
+
+                        {% else %}
+
+                        <span class="badge bg-danger">
+
+                            No Email
+
+                        </span>
+
+                        {% endif %}
+
+                    </div>
+
+                </div>
+
+                <hr>
+
+                {% else %}
+
+                <p class="text-center">
+
+                    No buyers found.
+
+                </p>
+
+                {% endfor %}
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- ==========================================
+     FOURTH ROW
+========================================== -->
+
+<div class="row mt-4">
+
+    <div class="col-12">
+
+        <div class="card">
+
+            <div class="card-body text-center py-5">
+
+                <i class="fa-solid fa-chart-column fa-3x text-primary mb-3"></i>
+
+                <h4>
+
+                    Export Automation System
+
+                </h4>
+
+                <p class="text-muted">
+
+                    Manage buyers, classify industries with AI, enrich contacts,
+                    launch campaigns and monitor performance from one dashboard.
+
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+</div>
+
+{% endblock %}

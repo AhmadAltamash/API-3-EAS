@@ -1,0 +1,364 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <h2>📧 Email Campaign</h2>
+
+        <a href="/campaign/history" class="btn btn-outline-dark">
+            Campaign History
+        </a>
+
+    </div>
+
+    <form method="POST" enctype="multipart/form-data">
+
+        <!-- Campaign Name -->
+
+        <div class="mb-3">
+
+            <label class="form-label">
+                Campaign Name
+            </label>
+
+            <input
+                type="text"
+                class="form-control"
+                name="campaign_name"
+                placeholder="Coffee Buyers July 2026"
+                required>
+
+        </div>
+
+        <!-- Subject -->
+
+        <div class="mb-3">
+
+            <label class="form-label">
+                Subject
+            </label>
+
+            <input
+                type="text"
+                class="form-control"
+                name="subject"
+                placeholder="Premium Coffee Beans from Nepal"
+                required>
+
+        </div>
+
+        <!-- Message -->
+
+        <div class="mb-3">
+
+            <label class="form-label">
+                Message
+            </label>
+
+            <textarea
+                class="form-control"
+                rows="10"
+                name="body"
+                required
+            >Dear {{company}},
+
+We are pleased to introduce our company.
+
+We manufacture and export premium quality products worldwide.
+
+We would be delighted to discuss possible business opportunities with your company.
+
+Please find our catalogue attached.
+
+Looking forward to hearing from you.
+
+Best Regards,
+Your Company</textarea>
+
+            <small class="text-muted">
+                Use <strong>{{company}}</strong> to automatically insert each buyer's company name.
+            </small>
+
+        </div>
+
+        <!-- Attachment -->
+
+        <div class="mb-4">
+
+            <label class="form-label">
+
+                Attachment
+
+            </label>
+
+            <input
+                class="form-control"
+                type="file"
+                name="attachment">
+
+            <small class="text-muted">
+
+                Optional (PDF, DOCX, XLSX, Images, etc.)
+
+            </small>
+
+        </div>
+
+        <!-- Categories -->
+
+        <div class="card mb-4">
+
+            <div class="card-header">
+
+                Select Categories
+
+            </div>
+
+            <div class="card-body">
+
+                <div class="row">
+
+                    <div class="col-md-4">
+
+                        <div class="form-check">
+
+                            <input
+                                class="form-check-input"
+                                type="checkbox"
+                                name="categories"
+                                value="Importer">
+
+                            <label class="form-check-label">
+
+                                Importers
+
+                            </label>
+
+                        </div>
+
+                    </div>
+
+                    <div class="col-md-4">
+
+                        <div class="form-check">
+
+                            <input
+                                class="form-check-input"
+                                type="checkbox"
+                                name="categories"
+                                value="Exporter">
+
+                            <label class="form-check-label">
+
+                                Exporters
+
+                            </label>
+
+                        </div>
+
+                    </div>
+
+                    <div class="col-md-4">
+
+                        <div class="form-check">
+
+                            <input
+                                class="form-check-input"
+                                type="checkbox"
+                                name="categories"
+                                value="Manufacturer">
+
+                            <label class="form-check-label">
+
+                                Manufacturers
+
+                            </label>
+
+                        </div>
+
+                    </div>
+
+                    <div class="col-md-4 mt-3">
+
+                        <div class="form-check">
+
+                            <input
+                                class="form-check-input"
+                                type="checkbox"
+                                name="categories"
+                                value="Distributor">
+
+                            <label class="form-check-label">
+
+                                Distributors
+
+                            </label>
+
+                        </div>
+
+                    </div>
+
+                    <div class="col-md-4 mt-3">
+
+                        <div class="form-check">
+
+                            <input
+                                class="form-check-input"
+                                type="checkbox"
+                                name="categories"
+                                value="Wholesaler">
+
+                            <label class="form-check-label">
+
+                                Wholesalers
+
+                            </label>
+
+                        </div>
+
+                    </div>
+
+                    <div class="col-md-4 mt-3">
+
+                        <div class="form-check">
+
+                            <input
+                                class="form-check-input"
+                                type="checkbox"
+                                name="categories"
+                                value="Retailer">
+
+                            <label class="form-check-label">
+
+                                Retailers
+
+                            </label>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- Send Options -->
+
+<div class="card mb-4">
+
+    <div class="card-header">
+
+        Send Options
+
+    </div>
+
+    <div class="card-body">
+
+        <div class="form-check">
+
+            <input
+                class="form-check-input"
+                type="checkbox"
+                name="send_all"
+                value="1"
+                id="send_all">
+
+            <label
+                class="form-check-label"
+                for="send_all">
+
+                Send to all buyers with a valid email address (Ignore Categories)
+
+            </label>
+
+        </div>
+
+        <small class="text-muted">
+
+            If checked, emails will be sent to every buyer having a valid email address,
+            regardless of their category (including Unknown).
+
+        </small>
+
+    </div>
+
+</div>
+
+        <!-- Buttons -->
+
+        <div class="d-flex gap-2">
+
+            <button
+                type="submit"
+                class="btn btn-primary">
+
+                🚀 Send Campaign
+
+            </button>
+
+            <button
+                type="reset"
+                class="btn btn-secondary">
+
+                Reset
+
+            </button>
+
+        </div>
+
+    </form>
+
+    {% if result %}
+
+    <div class="card mt-5 border-success">
+
+        <div class="card-header bg-success text-white">
+
+            Campaign Summary
+
+        </div>
+
+        <div class="card-body">
+
+            <div class="row text-center">
+
+                <div class="col-md-4">
+
+                    <h3>{{ result.sent }}</h3>
+
+                    <p>Sent</p>
+
+                </div>
+
+                <div class="col-md-4">
+
+                    <h3>{{ result.failed }}</h3>
+
+                    <p>Failed</p>
+
+                </div>
+
+                <div class="col-md-4">
+
+                    <h3>{{ result.total }}</h3>
+
+                    <p>Total</p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    {% endif %}
+
+</div>
+
+{% endblock %}

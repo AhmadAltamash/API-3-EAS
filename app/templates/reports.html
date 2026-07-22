@@ -1,0 +1,256 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="fade-up">
+
+    <!-- Header -->
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+
+            <h2 class="fw-bold mb-1">
+
+                Reports & Analytics
+
+            </h2>
+
+            <p class="text-muted">
+
+                Overview of buyers, campaigns and email performance.
+
+            </p>
+
+        </div>
+
+        <a
+            href="/dashboard"
+            class="btn btn-primary">
+
+            <i class="fa-solid fa-chart-line me-2"></i>
+
+            Dashboard
+
+        </a>
+
+    </div>
+
+
+    <!-- Statistics -->
+
+    <div class="row g-4 mb-4">
+
+        <div class="col-lg-3 col-md-6">
+
+            <div class="stats-card stats-primary">
+
+                <i class="fa-solid fa-users"></i>
+
+                <h6>Total Buyers</h6>
+
+                <h2>{{ total_buyers }}</h2>
+
+            </div>
+
+        </div>
+
+        <div class="col-lg-3 col-md-6">
+
+            <div class="stats-card stats-success">
+
+                <i class="fa-solid fa-envelope"></i>
+
+                <h6>Email Available</h6>
+
+                <h2>{{ email_buyers }}</h2>
+
+            </div>
+
+        </div>
+
+        <div class="col-lg-3 col-md-6">
+
+            <div class="stats-card stats-warning">
+
+                <i class="fa-solid fa-robot"></i>
+
+                <h6>AI Classified</h6>
+
+                <h2>{{ classified_buyers }}</h2>
+
+            </div>
+
+        </div>
+
+        <div class="col-lg-3 col-md-6">
+
+            <div class="stats-card stats-info">
+
+                <i class="fa-solid fa-paper-plane"></i>
+
+                <h6>Campaigns</h6>
+
+                <h2>{{ total_campaigns }}</h2>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- Email Performance -->
+
+    <div class="row g-4 mb-4">
+
+        <div class="col-lg-4">
+
+            <div class="stats-card stats-success">
+
+                <i class="fa-solid fa-circle-check"></i>
+
+                <h6>Emails Sent</h6>
+
+                <h2>{{ total_sent }}</h2>
+
+            </div>
+
+        </div>
+
+        <div class="col-lg-4">
+
+            <div class="stats-card stats-danger">
+
+                <i class="fa-solid fa-circle-xmark"></i>
+
+                <h6>Failed Emails</h6>
+
+                <h2>{{ total_failed }}</h2>
+
+            </div>
+
+        </div>
+
+        <div class="col-lg-4">
+
+            <div class="stats-card stats-primary">
+
+                <i class="fa-solid fa-chart-pie"></i>
+
+                <h6>Success Rate</h6>
+
+                <h2>{{ success_rate }}%</h2>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- Campaign History -->
+
+    <div class="card">
+
+        <div class="card-header d-flex justify-content-between">
+
+            <span>
+
+                Recent Campaigns
+
+            </span>
+
+            <span class="badge bg-primary">
+
+                {{ recent_campaigns|length }}
+
+            </span>
+
+        </div>
+
+        <div class="table-responsive">
+
+            <table class="table align-middle">
+
+                <thead>
+
+                    <tr>
+
+                        <th>Name</th>
+
+                        <th>Total</th>
+
+                        <th>Sent</th>
+
+                        <th>Failed</th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                {% for campaign in recent_campaigns %}
+
+                <tr>
+
+                    <td>
+
+                        <strong>
+
+                            {{ campaign.campaign_name }}
+
+                        </strong>
+
+                    </td>
+
+                    <td>{{ campaign.total }}</td>
+
+                    <td>
+
+                        <span class="badge bg-success">
+
+                            {{ campaign.sent }}
+
+                        </span>
+
+                    </td>
+
+                    <td>
+
+                        <span class="badge bg-danger">
+
+                            {{ campaign.failed }}
+
+                        </span>
+
+                    </td>
+
+                </tr>
+
+                {% else %}
+
+                <tr>
+
+                    <td colspan="4" class="text-center text-muted py-4">
+
+                        No campaigns available.
+
+                    </td>
+
+                </tr>
+
+                {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}
