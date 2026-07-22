@@ -2,7 +2,6 @@ import os
 import smtplib
 
 from email import encoders
-
 from email.mime.base import MIMEBase
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
@@ -12,16 +11,74 @@ from flask import current_app
 
 class GmailService:
 
+    def connect(self):
+
+        sender = current_app.config.get("GMAIL_EMAIL")
+        password = current_app.config.get("GMAIL_APP_PASSWORD")
+
+        if not sender or not password:
+            raise Exception(
+                "GMAIL_EMAIL or GMAIL_APP_PASSWORD is not configured."
+            )
+
+        try:
+
+            server = smtplib.SMTP(
+                "smtp.gmail.com",
+                587,
+                timeout=20
+            )
+
+            server.ehlo()
+
+            server.starttls()
+
+            server.ehlo()
+
+            server.login(
+                sender,
+                password
+            )
+
+            print("✓ Connected to Gmail SMTP")
+
+            return server
+
+        except Exception as e:
+
+            print("✗ Gmail connection failed")
+
+            print(e)
+
+            raise
+
+    def disconnect(self, server):
+
+        if server is None:
+            return
+
+        try:
+
+            server.quit()
+
+            print("✓ Gmail connection closed")
+
+        except Exception as e:
+
+            print("Error while closing SMTP connection")
+
+            print(e)
+
     def send(
         self,
+        server,
         receiver,
         subject,
         body,
         attachment_path=None
     ):
 
-        sender = current_app.config["GMAIL_EMAIL"]
-        password = current_app.config["GMAIL_APP_PASSWORD"]
+        sender = current_app.config.get("GMAIL_EMAIL")
 
         message = MIMEMultipart()
 
@@ -29,61 +86,53 @@ class GmailService:
         message["To"] = receiver
         message["Subject"] = subject
 
-        # Email Body
         message.attach(
             MIMEText(body, "plain")
         )
 
-        # ===========================
+        # -------------------------
         # Attachment
-        # ===========================
+        # -------------------------
 
         if attachment_path and os.path.exists(attachment_path):
 
-            with open(attachment_path, "rb") as file:
+            try:
 
-                part = MIMEBase(
-                    "application",
-                    "octet-stream"
+                with open(attachment_path, "rb") as file:
+
+                    part = MIMEBase(
+                        "application",
+                        "octet-stream"
+                    )
+
+                    part.set_payload(file.read())
+
+                encoders.encode_base64(part)
+
+                filename = os.path.basename(
+                    attachment_path
                 )
 
-                part.set_payload(file.read())
+                part.add_header(
+                    "Content-Disposition",
+                    f'attachment; filename="{filename}"'
+                )
 
-            encoders.encode_base64(part)
+                message.attach(part)
 
-            filename = os.path.basename(
-                attachment_path
-            )
+            except Exception as e:
 
-            part.add_header(
+                print("Attachment Error:")
 
-                "Content-Disposition",
+                print(e)
 
-                f'attachment; filename="{filename}"'
-
-            )
-
-            message.attach(part)
-
-        # ===========================
+        # -------------------------
         # Send Email
-        # ===========================
+        # -------------------------
 
         try:
 
-            with smtplib.SMTP(
-                "smtp.gmail.com",
-                587
-            ) as server:
-
-                server.starttls()
-
-                server.login(
-                    sender,
-                    password
-                )
-
-                server.send_message(message)
+            server.send_message(message)
 
             print(f"✓ Sent to {receiver}")
 
