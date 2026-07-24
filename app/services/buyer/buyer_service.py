@@ -1,7 +1,7 @@
 from app.services.search.search_manager import SearchManager
 from app.services.database.buyer_repository import BuyerRepository
 from app.services.ai.gemini_classifier import GeminiService
-
+from app.services.export.export_service import ExportService
 
 class BuyerService:
 
@@ -12,6 +12,8 @@ class BuyerService:
         self.repository = BuyerRepository()
 
         self.ai = GeminiService()
+
+        self.export = ExportService()
 
     # -----------------------------
     # Search Buyers
@@ -32,6 +34,10 @@ class BuyerService:
             )
 
             saved_buyers.append(saved)
+
+        self.export.buyers_csv(
+            self.repository.all()
+        )
 
         return saved_buyers
 
@@ -98,9 +104,17 @@ class BuyerService:
     # -----------------------------
     def delete_buyer(self, buyer_id):
 
-        self.repository.delete(
-            buyer_id
+        self.repository.delete(buyer_id)
+
+        self.export.buyers_csv(
+            self.repository.all()
         )
+
+    def delete_all_buyers(self):
+
+        self.repository.delete_all()
+
+        self.export.buyers_csv([])
 
     # -----------------------------
     # Dashboard

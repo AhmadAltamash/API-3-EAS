@@ -147,3 +147,9 @@ class BuyerRepository:
             buyer.phone = phone
 
         db.session.commit()
+
+    def delete_all(self):
+
+        Buyer.query.delete()
+
+        db.session.commit()

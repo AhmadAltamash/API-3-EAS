@@ -7,6 +7,7 @@ from .website_search import WebsiteSearch
 from app.services.pipeline.buyer_pipeline import BuyerPipeline
 from app.services.filter.result_filter import ResultFilter
 
+
 class SearchManager:
 
     def __init__(self):
@@ -21,22 +22,42 @@ class SearchManager:
 
     def search(self, source, keyword):
 
-        adapter = self.adapters.get(source)
+        pipeline = BuyerPipeline()
 
-        if adapter is None:
-            return []
+        all_results = []
 
-        search_results = adapter.search(keyword)
+        if source == "all":
+
+            for adapter in self.adapters.values():
+                all_results.extend(adapter.search(keyword))
+
+        else:
+
+            adapter = self.adapters.get(source)
+
+            if adapter is None:
+                return []
+
+            all_results = adapter.search(keyword)
+
+        # Remove duplicate URLs
+        unique = {}
+
+        for result in all_results:
+            if result.url and result.url not in unique:
+                unique[result.url] = result
+
+        search_results = list(unique.values())
 
         search_results = ResultFilter().filter(search_results)
-
-        pipeline = BuyerPipeline()
 
         buyers = []
 
         for result in search_results:
-            buyers.append(
-                pipeline.process(result)
-            )
+
+            buyer = pipeline.process(result)
+
+            if buyer:
+                buyers.append(buyer)
 
         return buyers

@@ -178,6 +178,31 @@
 
                 </a>
 
+                <a
+                    href="{{ url_for('buyers.download_buyers') }}"
+                    class="btn btn-info">
+
+                    <i class="fa-solid fa-download me-2"></i>
+
+                    Download CSV
+
+                </a>
+
+                <form
+                    action="{{ url_for('buyers.delete_all') }}"
+                    method="POST">
+
+                    <button
+                    class="btn btn-danger">
+
+                    <i class="fa-solid fa-trash me-2"></i>
+
+                    Delete All Buyers
+
+                    </button>
+
+                </form>
+
             </div>
 
         </div>
@@ -346,15 +371,30 @@
 
                         <td>
 
+                            <div class="d-flex gap-2">
+
                             <a
-                                href="{{ url_for('classify.classify', buyer_id=item.id) }}"
-                                class="btn btn-success btn-sm">
+                            href="{{ url_for('classify.classify', buyer_id=item.id) }}"
+                            class="btn btn-success btn-sm">
 
-                                <i class="fa-solid fa-robot me-1"></i>
-
-                                Classify
+                            <i class="fa-solid fa-robot"></i>
 
                             </a>
+
+                            <form
+                            action="{{ url_for('buyers.delete_one', buyer_id=item.id) }}"
+                            method="POST">
+
+                            <button
+                            class="btn btn-danger btn-sm">
+
+                            <i class="fa-solid fa-trash"></i>
+
+                            </button>
+
+                            </form>
+
+                            </div>
 
                         </td>
 

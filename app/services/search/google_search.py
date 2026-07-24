@@ -10,13 +10,19 @@ class GoogleSearch(BaseSearchAdapter):
 
         results = []
 
+        # US-focused query
+        query = (
+            f'{keyword} importer OR wholesaler OR distributor '
+            f'"United States" OR USA'
+        )
+
         try:
 
             with DDGS() as ddgs:
 
                 search_results = ddgs.text(
-                    keyword,
-                    max_results=20
+                    query,
+                    max_results=30
                 )
 
                 for item in search_results:
@@ -31,7 +37,6 @@ class GoogleSearch(BaseSearchAdapter):
                     )
 
         except Exception as e:
-
             print(e)
 
         return results
