@@ -19,24 +19,14 @@ class ExportService:
 
         writer.writerow([
             "Company",
-            "Email",
-            "Country",
-            "Category",
-            "Website",
-            "Source",
-            "Status"
+            "Email"
         ])
 
         for buyer in buyers:
 
             writer.writerow([
                 buyer.get("company", ""),
-                buyer.get("email", ""),
-                buyer.get("country", ""),
-                buyer.get("category", ""),
-                buyer.get("website", ""),
-                buyer.get("source", ""),
-                buyer.get("status", "Sent")
+                buyer.get("email", "")
             ])
 
         text_output.flush()

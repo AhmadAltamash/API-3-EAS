@@ -41,11 +41,6 @@ class BuyerRepository:
             Buyer.id.desc()
         ).all()
 
-    def all(self):
-        buyers = Buyer.query.all()
-        print(f"Total buyers in database: {len(buyers)}")
-        return buyers
-
     def update_category(self, buyer_id, category):
 
         buyer = Buyer.query.get(buyer_id)

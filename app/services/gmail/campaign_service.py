@@ -6,6 +6,10 @@ from app.services.database.campaign_repository import CampaignRepository
 
 class CampaignService:
 
+    # Gmail personal accounts get flagged/limited fast, so cap how many
+    # companies a single campaign run will email. Adjust if needed.
+    MAX_RECIPIENTS_PER_CAMPAIGN = 6
+
     def __init__(self):
 
         self.gmail = GmailService()
@@ -23,7 +27,7 @@ class CampaignService:
         send_all,
         subject,
         body,
-        attachment_path=None
+        attachment_paths=None
     ):
 
         buyers = self.buyers.all()
@@ -38,6 +42,9 @@ class CampaignService:
         try:
 
             for buyer in buyers:
+
+                if recipients >= self.MAX_RECIPIENTS_PER_CAMPAIGN:
+                    break
 
                 if not send_all and buyer.category not in categories:
                     continue
@@ -58,7 +65,7 @@ class CampaignService:
                     receiver=buyer.email,
                     subject=subject,
                     body=personalized_body,
-                    attachment_path=attachment_path
+                    attachment_paths=attachment_paths
                 )
 
                 self.logs.save(
@@ -79,7 +86,13 @@ class CampaignService:
                 })
 
                 if success:
+
                     sent += 1
+
+                    # Remove the buyer once emailed so this (or a future)
+                    # campaign never sends to them again.
+                    self.buyers.delete(buyer.id)
+
                 else:
                     failed += 1
 

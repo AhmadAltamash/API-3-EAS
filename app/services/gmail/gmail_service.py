@@ -1,3 +1,4 @@
+import mimetypes
 import os
 import smtplib
 
@@ -75,7 +76,7 @@ class GmailService:
         receiver,
         subject,
         body,
-        attachment_path=None
+        attachment_paths=None
     ):
 
         sender = current_app.config.get("GMAIL_EMAIL")
@@ -91,40 +92,52 @@ class GmailService:
         )
 
         # -------------------------
-        # Attachment
+        # Attachments (multiple, any type)
         # -------------------------
 
-        if attachment_path and os.path.exists(attachment_path):
+        if attachment_paths:
 
-            try:
+            for attachment_path in attachment_paths:
 
-                with open(attachment_path, "rb") as file:
+                if not attachment_path or not os.path.exists(attachment_path):
+                    continue
 
-                    part = MIMEBase(
-                        "application",
-                        "octet-stream"
+                try:
+
+                    mime_type, _ = mimetypes.guess_type(attachment_path)
+
+                    if mime_type:
+                        maintype, subtype = mime_type.split("/", 1)
+                    else:
+                        maintype, subtype = "application", "octet-stream"
+
+                    with open(attachment_path, "rb") as file:
+
+                        part = MIMEBase(
+                            maintype,
+                            subtype
+                        )
+
+                        part.set_payload(file.read())
+
+                    encoders.encode_base64(part)
+
+                    filename = os.path.basename(
+                        attachment_path
                     )
 
-                    part.set_payload(file.read())
+                    part.add_header(
+                        "Content-Disposition",
+                        f'attachment; filename="{filename}"'
+                    )
 
-                encoders.encode_base64(part)
+                    message.attach(part)
 
-                filename = os.path.basename(
-                    attachment_path
-                )
+                except Exception as e:
 
-                part.add_header(
-                    "Content-Disposition",
-                    f'attachment; filename="{filename}"'
-                )
+                    print(f"Attachment Error ({attachment_path}):")
 
-                message.attach(part)
-
-            except Exception as e:
-
-                print("Attachment Error:")
-
-                print(e)
+                    print(e)
 
         # -------------------------
         # Send Email
