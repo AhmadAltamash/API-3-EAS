@@ -2,6 +2,7 @@
 
 An AI-powered web application built with **Flask** to help businesses discover international buyers, classify them using Google Gemini AI, enrich contact information, and launch targeted email campaigns.
 
+<img src=/app/uploads/API-3.png/>
 ---
 
 ## 📖 Overview
