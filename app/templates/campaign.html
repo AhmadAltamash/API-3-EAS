@@ -63,20 +63,21 @@
                 rows="10"
                 name="body"
                 required
-            >Dear {{company}},
+            >Dear Sir/Madam,
 
-We are pleased to introduce our company.
+I hope this email finds you well.
 
-We manufacture and export premium quality products worldwide.
+We are Product Zone International, a manufacturer and exporter of premium metal and crystal candle holders, supplying wholesalers, importers, retailers, and home décor businesses worldwide.
 
-We would be delighted to discuss possible business opportunities with your company.
+We are pleased to introduce our latest Candle Holder Collection, featuring a wide range of contemporary and classic designs suitable for home décor, hospitality, gifting, events, and lifestyle retail.
 
-Please find our catalogue attached.
+Please find our product catalogue attached. If our collection matches your sourcing requirements, we would be delighted to share our wholesale price list, product specifications, MOQ details, and discuss a long-term business partnership.
 
-Looking forward to hearing from you.
+We look forward to the opportunity of working with you.
 
 Best Regards,
-Your Company</textarea>
+Product Zone International
+Contact: Exportindia2026us@gmail.com</textarea>
 
             <small class="text-muted">
                 Use <strong>{{company}}</strong> to automatically insert each buyer's company name.
@@ -90,18 +91,19 @@ Your Company</textarea>
 
             <label class="form-label">
 
-                Attachment
+                Attachments
 
             </label>
 
             <input
                 class="form-control"
                 type="file"
-                name="attachment">
+                name="attachments"
+                multiple>
 
             <small class="text-muted">
 
-                Optional (PDF, DOCX, XLSX, Images, etc.)
+                Optional &mdash; select one or more files (PDF, PNG, JPG, DOCX, XLSX, etc.)
 
             </small>
 
@@ -282,6 +284,16 @@ Your Company</textarea>
 
             If checked, emails will be sent to every buyer having a valid email address,
             regardless of their category (including Unknown).
+
+        </small>
+
+        <hr>
+
+        <small class="text-muted">
+
+            Each campaign run sends to at most <strong>6 companies</strong> to stay within
+            Gmail's sending limits. Companies that receive an email are removed from the
+            database afterward so they won't be emailed again in a future campaign.
 
         </small>
 
