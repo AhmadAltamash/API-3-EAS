@@ -34,21 +34,26 @@ def campaign():
 
         send_all = request.form.get("send_all") == "1"
 
-        attachment = request.files.get("attachment")
+        attachments = request.files.getlist("attachments")
 
-        attachment_path = None
+        attachment_paths = []
 
-        if attachment and attachment.filename:
+        if attachments:
 
             upload_folder = Path(current_app.root_path) / "uploads"
 
             upload_folder.mkdir(exist_ok=True)
 
-            attachment_path = upload_folder / attachment.filename
+            for attachment in attachments:
 
-            attachment.save(attachment_path)
+                if not attachment or not attachment.filename:
+                    continue
 
-            attachment_path = str(attachment_path)
+                attachment_path = upload_folder / attachment.filename
+
+                attachment.save(attachment_path)
+
+                attachment_paths.append(str(attachment_path))
 
         result = CampaignService().send_campaign(
 
@@ -62,7 +67,7 @@ def campaign():
 
             body=body,
 
-            attachment_path=attachment_path
+            attachment_paths=attachment_paths
 
         )
 
