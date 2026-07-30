@@ -1,0 +1,353 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="fade-up">
+
+    <!-- Header -->
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+
+            <h2 class="fw-bold mb-1">
+
+                Settings
+
+            </h2>
+
+            <p class="text-muted">
+
+                Manage application configuration and integrations.
+
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <div class="row g-4">
+
+        <!-- Email Settings -->
+
+        <div class="col-lg-6">
+
+            <div class="card h-100">
+
+                <div class="card-header">
+
+                    <i class="fa-solid fa-envelope me-2"></i>
+
+                    Email Configuration
+
+                </div>
+
+                <div class="card-body">
+
+                    <div class="mb-3">
+
+                        <label class="form-label">
+
+                            SMTP Server
+
+                        </label>
+
+                        <input
+                            type="text"
+                            class="form-control"
+                            value="smtp.gmail.com"
+                            disabled>
+
+                    </div>
+
+                    <div class="mb-3">
+
+                        <label class="form-label">
+
+                            Port
+
+                        </label>
+
+                        <input
+                            type="text"
+                            class="form-control"
+                            value="587"
+                            disabled>
+
+                    </div>
+
+                    <div class="mb-3">
+
+                        <label class="form-label">
+
+                            Sender Email
+
+                        </label>
+
+                        <input
+                            type="text"
+                            class="form-control"
+                            placeholder="Configured in .env"
+                            disabled>
+
+                    </div>
+
+                    <button class="btn btn-secondary" disabled>
+
+                        <i class="fa-solid fa-lock me-2"></i>
+
+                        Managed via .env
+
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- AI Settings -->
+
+        <div class="col-lg-6">
+
+            <div class="card h-100">
+
+                <div class="card-header">
+
+                    <i class="fa-solid fa-robot me-2"></i>
+
+                    Gemini AI
+
+                </div>
+
+                <div class="card-body">
+
+                    <div class="mb-3">
+
+                        <label class="form-label">
+
+                            AI Provider
+
+                        </label>
+
+                        <input
+                            type="text"
+                            class="form-control"
+                            value="Google Gemini"
+                            disabled>
+
+                    </div>
+
+                    <div class="mb-3">
+
+                        <label class="form-label">
+
+                            API Key
+
+                        </label>
+
+                        <input
+                            type="password"
+                            class="form-control"
+                            value="********************"
+                            disabled>
+
+                    </div>
+
+                    <button class="btn btn-secondary" disabled>
+
+                        <i class="fa-solid fa-key me-2"></i>
+
+                        Stored in .env
+
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="row g-4 mt-1">
+
+        <!-- Application -->
+
+        <div class="col-lg-6">
+
+            <div class="card h-100">
+
+                <div class="card-header">
+
+                    <i class="fa-solid fa-gear me-2"></i>
+
+                    Application
+
+                </div>
+
+                <div class="card-body">
+
+                    <table class="table">
+
+                        <tr>
+
+                            <td>Framework</td>
+
+                            <td><strong>Flask</strong></td>
+
+                        </tr>
+
+                        <tr>
+
+                            <td>Database</td>
+
+                            <td><strong>SQLite</strong></td>
+
+                        </tr>
+
+                        <tr>
+
+                            <td>ORM</td>
+
+                            <td><strong>SQLAlchemy</strong></td>
+
+                        </tr>
+
+                        <tr>
+
+                            <td>AI Model</td>
+
+                            <td><strong>Gemini</strong></td>
+
+                        </tr>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- System Status -->
+
+        <div class="col-lg-6">
+
+            <div class="card h-100">
+
+                <div class="card-header">
+
+                    <i class="fa-solid fa-circle-info me-2"></i>
+
+                    System Status
+
+                </div>
+
+                <div class="card-body">
+
+                    <div class="d-flex justify-content-between mb-3">
+
+                        <span>
+
+                            Database
+
+                        </span>
+
+                        <span class="badge bg-success">
+
+                            Connected
+
+                        </span>
+
+                    </div>
+
+                    <div class="d-flex justify-content-between mb-3">
+
+                        <span>
+
+                            Gemini AI
+
+                        </span>
+
+                        <span class="badge bg-success">
+
+                            Ready
+
+                        </span>
+
+                    </div>
+
+                    <div class="d-flex justify-content-between mb-3">
+
+                        <span>
+
+                            SMTP
+
+                        </span>
+
+                        <span class="badge bg-success">
+
+                            Configured
+
+                        </span>
+
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+
+                        <span>
+
+                            Application
+
+                        </span>
+
+                        <span class="badge bg-success">
+
+                            Running
+
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- Footer -->
+
+    <div class="card mt-4">
+
+        <div class="card-body text-center">
+
+            <i class="fa-solid fa-shield-halved fa-2x text-primary mb-3"></i>
+
+            <h5>
+
+                Export Automation System
+
+            </h5>
+
+            <p class="text-muted mb-0">
+
+                Configuration values such as Gmail credentials and Gemini API keys
+                are securely managed through your <strong>.env</strong> file.
+
+            </p>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

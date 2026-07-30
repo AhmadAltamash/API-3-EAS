@@ -1,0 +1,327 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="fade-up">
+
+    <!-- Header -->
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+
+            <h2 class="fw-bold mb-1">
+
+                AI Buyer Classification
+
+            </h2>
+
+            <p class="text-muted">
+
+                Automatically classify buyers using Gemini AI.
+
+            </p>
+
+        </div>
+
+        <div class="d-flex gap-2">
+
+            <a
+                href="/buyers"
+                class="btn btn-outline-primary">
+
+                <i class="fa-solid fa-users me-2"></i>
+
+                Buyer Database
+
+            </a>
+
+            <a
+                href="{{ url_for('classify.classify_all') }}"
+                class="btn btn-success">
+
+                <i class="fa-solid fa-robot me-2"></i>
+
+                Classify All
+
+            </a>
+
+        </div>
+
+    </div>
+
+
+    <!-- Statistics -->
+
+    <div class="row g-4 mb-4">
+
+        <div class="col-lg-3 col-md-6">
+
+            <div class="stats-card stats-primary">
+
+                <i class="fa-solid fa-users"></i>
+
+                <h6>Total Buyers</h6>
+
+                <h2>
+
+                    {{ buyers|length }}
+
+                </h2>
+
+            </div>
+
+        </div>
+
+        <div class="col-lg-3 col-md-6">
+
+            <div class="stats-card stats-success">
+
+                <i class="fa-solid fa-circle-check"></i>
+
+                <h6>Classified</h6>
+
+                <h2>
+
+                    {{ buyers|rejectattr('category','equalto','Unknown')|list|length }}
+
+                </h2>
+
+            </div>
+
+        </div>
+
+        <div class="col-lg-3 col-md-6">
+
+            <div class="stats-card stats-warning">
+
+                <i class="fa-solid fa-clock"></i>
+
+                <h6>Pending</h6>
+
+                <h2>
+
+                    {{ buyers|selectattr('category','equalto','Unknown')|list|length }}
+
+                </h2>
+
+            </div>
+
+        </div>
+
+        <div class="col-lg-3 col-md-6">
+
+            <div class="stats-card stats-info">
+
+                <i class="fa-solid fa-brain"></i>
+
+                <h6>AI Engine</h6>
+
+                <h2>
+
+                    Gemini
+
+                </h2>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- Information -->
+
+    <div class="card mb-4">
+
+        <div class="card-header">
+
+            AI Classification
+
+        </div>
+
+        <div class="card-body">
+
+            <div class="row align-items-center">
+
+                <div class="col-lg-9">
+
+                    <h5>
+
+                        Google Gemini AI
+
+                    </h5>
+
+                    <p class="text-muted mb-0">
+
+                        The AI analyzes each buyer's company information and
+                        classifies businesses into Importer, Exporter,
+                        Manufacturer, Distributor, Wholesaler or Retailer.
+
+                    </p>
+
+                </div>
+
+                <div class="col-lg-3 text-lg-end mt-3 mt-lg-0">
+
+                    <a
+                        href="{{ url_for('classify.classify_all') }}"
+                        class="btn btn-success btn-lg">
+
+                        <i class="fa-solid fa-bolt me-2"></i>
+
+                        Run AI
+
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- Buyers Table -->
+
+    <div class="card">
+
+        <div class="card-header d-flex justify-content-between">
+
+            <span>
+
+                Buyer Classification
+
+            </span>
+
+            <span class="badge bg-primary">
+
+                {{ buyers|length }} Buyers
+
+            </span>
+
+        </div>
+
+        <div class="table-responsive">
+
+            <table class="table align-middle">
+
+                <thead>
+
+                    <tr>
+
+                        <th>ID</th>
+
+                        <th>Company</th>
+
+                        <th>Website</th>
+
+                        <th>Category</th>
+
+                        <th>Action</th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                {% for buyer in buyers %}
+
+                <tr>
+
+                    <td>
+
+                        #{{ buyer.id }}
+
+                    </td>
+
+                    <td>
+
+                        <strong>
+
+                            {{ buyer.company }}
+
+                        </strong>
+
+                    </td>
+
+                    <td>
+
+                        {% if buyer.website %}
+
+                        <a
+                            href="{{ buyer.website }}"
+                            target="_blank"
+                            class="btn btn-outline-primary btn-sm">
+
+                            <i class="fa-solid fa-globe me-1"></i>
+
+                            Visit
+
+                        </a>
+
+                        {% else %}
+
+                        -
+
+                        {% endif %}
+
+                    </td>
+
+                    <td>
+
+                        {% if buyer.category=="Importer" %}
+                        <span class="badge bg-success">Importer</span>
+
+                        {% elif buyer.category=="Exporter" %}
+                        <span class="badge bg-primary">Exporter</span>
+
+                        {% elif buyer.category=="Manufacturer" %}
+                        <span class="badge bg-warning text-dark">Manufacturer</span>
+
+                        {% elif buyer.category=="Distributor" %}
+                        <span class="badge bg-info text-dark">Distributor</span>
+
+                        {% elif buyer.category=="Wholesaler" %}
+                        <span class="badge bg-secondary">Wholesaler</span>
+
+                        {% elif buyer.category=="Retailer" %}
+                        <span class="badge bg-dark">Retailer</span>
+
+                        {% else %}
+                        <span class="badge bg-danger">Unknown</span>
+                        {% endif %}
+
+                    </td>
+
+                    <td>
+
+                        <a
+                            href="{{ url_for('classify.classify', buyer_id=buyer.id) }}"
+                            class="btn btn-success btn-sm">
+
+                            <i class="fa-solid fa-robot me-1"></i>
+
+                            Classify
+
+                        </a>
+
+                    </td>
+
+                </tr>
+
+                {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,225 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <h2>📜 Campaign History</h2>
+
+        <a href="/campaign" class="btn btn-primary">
+            ← Back to Campaign
+        </a>
+
+    </div>
+
+    {% if campaigns %}
+
+    <!-- Statistics -->
+
+    <div class="row mb-4">
+
+        <div class="col-md-3">
+
+            <div class="card text-center shadow-sm">
+
+                <div class="card-body">
+
+                    <h3>{{ campaigns|length }}</h3>
+
+                    <p class="mb-0">Campaigns</p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="col-md-3">
+
+            <div class="card text-center shadow-sm">
+
+                <div class="card-body">
+
+                    <h3>{{ campaigns|sum(attribute='recipients') }}</h3>
+
+                    <p class="mb-0">Recipients</p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="col-md-3">
+
+            <div class="card text-center shadow-sm">
+
+                <div class="card-body">
+
+                    <h3>{{ campaigns|sum(attribute='sent') }}</h3>
+
+                    <p class="mb-0 text-success">Emails Sent</p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="col-md-3">
+
+            <div class="card text-center shadow-sm">
+
+                <div class="card-body">
+
+                    <h3>{{ campaigns|sum(attribute='failed') }}</h3>
+
+                    <p class="mb-0 text-danger">Failed</p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Campaign Table -->
+
+    <div class="card shadow">
+
+        <div class="card-header">
+
+            <strong>Campaign Records</strong>
+
+        </div>
+
+        <div class="table-responsive">
+
+            <table class="table table-hover table-striped align-middle mb-0">
+
+                <thead class="table-dark">
+
+                    <tr>
+
+                        <th>#</th>
+
+                        <th>Campaign</th>
+
+                        <th>Subject</th>
+
+                        <th>Recipients</th>
+
+                        <th>Sent</th>
+
+                        <th>Failed</th>
+
+                        <th>Success %</th>
+
+                        <th>Date</th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                    {% for campaign in campaigns %}
+
+                    <tr>
+
+                        <td>{{ loop.index }}</td>
+
+                        <td>{{ campaign.campaign_name }}</td>
+
+                        <td>{{ campaign.subject }}</td>
+
+                        <td>
+
+                            <span class="badge bg-secondary">
+
+                                {{ campaign.recipients }}
+
+                            </span>
+
+                        </td>
+
+                        <td>
+
+                            <span class="badge bg-success">
+
+                                {{ campaign.sent }}
+
+                            </span>
+
+                        </td>
+
+                        <td>
+
+                            <span class="badge bg-danger">
+
+                                {{ campaign.failed }}
+
+                            </span>
+
+                        </td>
+
+                        <td>
+
+                            {% if campaign.recipients > 0 %}
+
+                                {{ ((campaign.sent / campaign.recipients) * 100)|round(1) }}%
+
+                            {% else %}
+
+                                0%
+
+                            {% endif %}
+
+                        </td>
+
+                        <td>
+
+                            {{ campaign.created_at.strftime("%d-%m-%Y %H:%M") }}
+
+                        </td>
+
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+    {% else %}
+
+    <div class="alert alert-info text-center">
+
+        <h4>No Campaign History Found</h4>
+
+        <p>
+
+            Send your first campaign and it will appear here.
+
+        </p>
+
+        <a href="/campaign" class="btn btn-primary">
+
+            Create Campaign
+
+        </a>
+
+    </div>
+
+    {% endif %}
+
+</div>
+
+{% endblock %}

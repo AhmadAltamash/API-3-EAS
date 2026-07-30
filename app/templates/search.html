@@ -1,0 +1,384 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="fade-up">
+
+    <!-- ================= PAGE HEADER ================= -->
+
+    <div class="hero-banner d-flex justify-content-between align-items-center">
+
+        <div>
+
+            <div class="hero-eyebrow">
+
+                <i class="fa-solid fa-magnifying-glass"></i>
+
+                Buyer Discovery
+
+            </div>
+
+            <h2>
+
+                Search Buyers
+
+            </h2>
+
+            <p>
+
+                Scans Google, Facebook, LinkedIn, business directories and company
+                websites for USA-based buyers with a real email address.
+
+            </p>
+
+        </div>
+
+        <a href="/buyers" class="btn btn-primary">
+
+            <i class="fa-solid fa-database me-2"></i>
+
+            Buyer Database
+
+        </a>
+
+        <div class="hero-stamp">
+
+            USA Only
+
+        </div>
+
+    </div>
+
+    <!-- ================= SEARCH BOX ================= -->
+
+    <div class="card mb-4">
+
+        <div class="card-header">
+
+            <i class="fa-solid fa-magnifying-glass me-2"></i>
+
+            Buyer Search
+
+        </div>
+
+        <div class="card-body">
+
+            <form method="POST">
+
+                <div class="row g-3">
+
+                    <div class="col-lg-7">
+
+                        <label class="form-label">
+
+                            Search Keyword
+
+                        </label>
+
+                        <input
+                            type="text"
+                            class="form-control"
+                            name="keyword"
+                            placeholder="Example: Rice Importers, Tea Buyers, Textile Companies"
+                            required>
+
+                    </div>
+
+                    <div class="col-lg-3">
+
+                        <label class="form-label">
+
+                            Search Source
+
+                        </label>
+
+                        <select
+                            class="form-select"
+                            name="source">
+
+                            <option value="all">
+
+                                All Sources
+
+                            </option>
+
+                            <option value="google">
+
+                                Google
+
+                            </option>
+
+                            <option value="facebook">
+
+                                Facebook
+
+                            </option>
+
+                            <option value="linkedin">
+
+                                LinkedIn
+
+                            </option>
+
+                            <option value="directory">
+
+                                Business Directory
+
+                            </option>
+
+                            <option value="website">
+
+                                Company Websites
+
+                            </option>
+
+                        </select>
+
+                    </div>
+
+                    <div class="col-lg-2 d-flex align-items-end">
+
+                        <button
+                            type="submit"
+                            class="btn btn-primary w-100">
+
+                            <i class="fa-solid fa-search me-2"></i>
+
+                            Search
+
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+    <!-- ================= SEARCH RESULTS ================= -->
+
+    {% if buyers %}
+
+    <div class="card">
+
+        <div class="card-header d-flex justify-content-between align-items-center">
+
+            <div>
+
+                <i class="fa-solid fa-list me-2"></i>
+
+                Search Results
+
+            </div>
+
+            <span class="badge bg-primary">
+
+                {{ buyers|length }} Results
+
+            </span>
+
+        </div>
+
+        <div class="card-body p-0">
+
+            <div class="table-responsive">
+
+                <table class="table align-middle">
+
+                    <thead>
+
+                        <tr>
+
+                            <th>Company</th>
+
+                            <th>Country</th>
+
+                            <th>Email</th>
+
+                            <th>Website</th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                    {% for buyer in buyers %}
+
+                        <tr>
+
+                            <td>
+
+                                <strong>
+
+                                    {{ buyer.company or "-" }}
+
+                                </strong>
+
+                            </td>
+
+                            <td>
+
+                                {{ buyer.country or "-" }}
+
+                            </td>
+
+                            <td>
+
+                                {% if buyer.email %}
+
+                                    <span class="badge bg-success">
+
+                                        {{ buyer.email }}
+
+                                    </span>
+
+                                {% else %}
+
+                                    <span class="badge bg-danger">
+
+                                        Not Available
+
+                                    </span>
+
+                                {% endif %}
+
+                            </td>
+
+                            <td>
+
+                                {% if buyer.website %}
+
+                                    <a
+                                        href="{{ buyer.website }}"
+                                        target="_blank"
+                                        class="btn btn-outline-primary btn-sm">
+
+                                        <i class="fa-solid fa-globe me-1"></i>
+
+                                        Visit
+
+                                    </a>
+
+                                {% else %}
+
+                                    -
+
+                                {% endif %}
+
+                            </td>
+
+                        </tr>
+
+                    {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    {% else %}
+
+    <!-- ================= EMPTY STATE ================= -->
+
+    <div class="card">
+
+        <div class="card-body text-center py-5">
+
+            <i class="fa-solid fa-earth-americas fa-4x text-primary mb-4"></i>
+
+            <h3>
+
+                Find International Buyers
+
+            </h3>
+
+            <p class="text-muted mb-4">
+
+                Search buyers by product or business keyword using multiple sources.
+
+            </p>
+
+            <div class="row justify-content-center">
+
+                <div class="col-lg-8">
+
+                    <div class="row g-3">
+
+                        <div class="col-md-4">
+
+                            <div class="stats-card stats-primary">
+
+                                <i class="fa-solid fa-globe"></i>
+
+                                <h6>5 Live Sources</h6>
+
+                                <p class="mb-0">
+
+                                    Google, Facebook, LinkedIn, Directories & Websites
+
+                                </p>
+
+                            </div>
+
+                        </div>
+
+                        <div class="col-md-4">
+
+                            <div class="stats-card stats-success">
+
+                                <i class="fa-solid fa-flag-usa"></i>
+
+                                <h6>USA-Based Only</h6>
+
+                                <p class="mb-0">
+
+                                    Non-US companies are filtered out automatically
+
+                                </p>
+
+                            </div>
+
+                        </div>
+
+                        <div class="col-md-4">
+
+                            <div class="stats-card stats-info">
+
+                                <i class="fa-solid fa-envelope"></i>
+
+                                <h6>Email Verified</h6>
+
+                                <p class="mb-0">
+
+                                    Only companies with a real email are shown
+
+                                </p>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    {% endif %}
+
+</div>
+
+{% endblock %}
