@@ -1,3 +1,4 @@
+from datetime import datetime
 from pathlib import Path
 
 from flask import Blueprint
@@ -88,6 +89,13 @@ def campaign():
 
         )
 
+        timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+
+        safe_name = "".join(
+            c if c.isalnum() or c in ("-", "_") else "_"
+            for c in (campaign_name or "campaign")
+        )
+
         return send_file(
 
             csv_file,
@@ -96,7 +104,7 @@ def campaign():
 
             as_attachment=True,
 
-            download_name=f"{campaign_name}_report.csv"
+            download_name=f"{safe_name}_report_{timestamp}.csv"
 
         )
 
