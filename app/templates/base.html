@@ -58,7 +58,7 @@
 
             <li>
 
-                <a href="/">
+                <a href="/" class="{{ 'active' if request.path == '/' else '' }}">
 
                     <i class="fa-solid fa-house"></i>
 
@@ -70,7 +70,7 @@
 
             <li>
 
-                <a href="/search">
+                <a href="/search" class="{{ 'active' if request.path == '/search' else '' }}">
 
                     <i class="fa-solid fa-magnifying-glass"></i>
 
@@ -82,7 +82,7 @@
 
             <li>
 
-                <a href="/buyers">
+                <a href="/buyers" class="{{ 'active' if request.path == '/buyers' else '' }}">
 
                     <i class="fa-solid fa-users"></i>
 
@@ -94,7 +94,7 @@
 
             <li>
 
-                <a href="/classify">
+                <a href="/classify" class="{{ 'active' if request.path == '/classify' else '' }}">
 
                     <i class="fa-solid fa-robot"></i>
 
@@ -106,7 +106,7 @@
 
             <li>
 
-                <a href="/campaign">
+                <a href="/campaign" class="{{ 'active' if request.path == '/campaign' else '' }}">
 
                     <i class="fa-solid fa-paper-plane"></i>
 
@@ -118,7 +118,7 @@
 
             <li>
 
-                <a href="/campaign/history">
+                <a href="/campaign/history" class="{{ 'active' if request.path == '/campaign/history' else '' }}">
 
                     <i class="fa-solid fa-clock-rotate-left"></i>
 
@@ -130,7 +130,7 @@
 
             <li>
 
-                <a href="/reports">
+                <a href="/reports" class="{{ 'active' if request.path == '/reports' else '' }}">
 
                     <i class="fa-solid fa-chart-column"></i>
 
@@ -142,7 +142,7 @@
 
             <li>
 
-                <a href="/settings">
+                <a href="/settings" class="{{ 'active' if request.path == '/settings' else '' }}">
 
                     <i class="fa-solid fa-gear"></i>
 
@@ -180,6 +180,14 @@
 
                     API - 3 Export Automation System
                 </h3>
+
+            </div>
+
+            <div class="usa-badge">
+
+                <i class="fa-solid fa-flag-usa"></i>
+
+                USA Buyers Only
 
             </div>
 
