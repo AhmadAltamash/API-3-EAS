@@ -47,8 +47,11 @@ class BuyerPipeline:
             html
         )
 
-        # Only keep US-based buyers - drop everything else
+        # Only keep US-based buyers with a usable email - drop everything else
         if buyer.country != "United States":
+            return None
+
+        if not buyer.email:
             return None
 
         return buyer

@@ -63,10 +63,10 @@
     margin-bottom:30px;
 } */
 /* ===========================
-   GOOGLE FONT
+   GOOGLE FONTS
 =========================== */
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@500;600;700&display=swap');
 
 
 /* ===========================
@@ -75,34 +75,40 @@
 
 :root{
 
-    --primary:#2563eb;
-    --primary-dark:#1d4ed8;
+    /* "Trade manifest" identity: deep ink navy + brass/copper accent,
+       evoking export paperwork and shipping stamps rather than a
+       generic SaaS blue. */
 
-    --sidebar:#0f172a;
+    --primary:#b5652f;
+    --primary-dark:#96501f;
 
-    --sidebar-hover:#1e293b;
+    --sidebar:#0b1626;
 
-    --success:#10b981;
+    --sidebar-hover:#16233a;
 
-    --danger:#ef4444;
+    --success:#1f8a70;
 
-    --warning:#f59e0b;
+    --danger:#c0392b;
 
-    --info:#06b6d4;
+    --warning:#c98a1f;
 
-    --background:#f4f7fc;
+    --info:#2f6f8f;
+
+    --background:#f6f3ec;
 
     --white:#ffffff;
 
-    --border:#e5e7eb;
+    --border:#e6dfd0;
 
-    --text:#334155;
+    --text:#2a2620;
 
-    --muted:#64748b;
+    --muted:#77705f;
 
     --radius:14px;
 
-    --shadow:0 8px 24px rgba(0,0,0,.08);
+    --shadow:0 8px 24px rgba(24,17,6,.08);
+
+    --font-display:'Space Grotesk',sans-serif;
 
 }
 
@@ -127,6 +133,11 @@ body{
 
     background:var(--background);
 
+    background-image:
+        radial-gradient(circle at 1px 1px, rgba(24,17,6,.05) 1px, transparent 0);
+
+    background-size:22px 22px;
+
     color:var(--text);
 
 }
@@ -140,6 +151,14 @@ a{
 ul{
 
     list-style:none;
+
+}
+
+h1, h2, h3, h4, h5, h6{
+
+    font-family:var(--font-display);
+
+    letter-spacing:-.01em;
 
 }
 
@@ -221,7 +240,7 @@ ul{
 
     font-size:42px;
 
-    color:#60a5fa;
+    color:#d99a5b;
 
 }
 
@@ -230,6 +249,8 @@ ul{
     margin:0;
 
     font-weight:700;
+
+    font-family:var(--font-display);
 
 }
 
@@ -286,6 +307,16 @@ ul{
     color:white;
 
     transform:translateX(5px);
+
+}
+
+.sidebar-menu a.active{
+
+    background:linear-gradient(135deg, var(--primary), var(--primary-dark));
+
+    color:white;
+
+    box-shadow:0 6px 16px rgba(181,101,47,.35);
 
 }
 
@@ -365,6 +396,30 @@ ul{
     font-size:28px;
 
     color:var(--primary);
+
+}
+
+.usa-badge{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:8px;
+
+    background:linear-gradient(135deg, rgba(181,101,47,.12), rgba(31,138,112,.12));
+
+    border:1px solid rgba(181,101,47,.3);
+
+    color:var(--primary-dark);
+
+    font-weight:700;
+
+    font-size:13px;
+
+    padding:8px 16px;
+
+    border-radius:30px;
 
 }
 /* ======================================================
@@ -1339,3 +1394,166 @@ label{
 /* ======================================================
    END OF STYLE.CSS
 ====================================================== */
+
+
+/* ======================================================
+   HERO BANNER (signature page-header component)
+====================================================== */
+
+.hero-banner{
+
+    position:relative;
+
+    border-radius:20px;
+
+    padding:34px 38px;
+
+    margin-bottom:30px;
+
+    overflow:hidden;
+
+    background:
+        linear-gradient(120deg, #10192b 0%, #1c2c47 55%, #3a2a1c 100%);
+
+    color:#f5f1e8;
+
+    box-shadow:0 18px 40px rgba(16,25,43,.25);
+
+}
+
+.hero-banner::before{
+
+    content:"";
+
+    position:absolute;
+
+    inset:0;
+
+    background-image:
+        repeating-linear-gradient(
+            45deg,
+            rgba(217,154,91,.06) 0,
+            rgba(217,154,91,.06) 2px,
+            transparent 2px,
+            transparent 14px
+        );
+
+    pointer-events:none;
+
+}
+
+.hero-eyebrow{
+
+    display:inline-flex;
+
+    align-items:center;
+
+    gap:8px;
+
+    font-size:12px;
+
+    font-weight:700;
+
+    letter-spacing:1.5px;
+
+    text-transform:uppercase;
+
+    color:#d99a5b;
+
+    margin-bottom:10px;
+
+}
+
+.hero-eyebrow i{
+
+    font-size:11px;
+
+}
+
+.hero-banner h2{
+
+    font-family:var(--font-display);
+
+    font-size:30px;
+
+    font-weight:700;
+
+    margin-bottom:6px;
+
+    position:relative;
+
+}
+
+.hero-banner p{
+
+    color:#c8cede;
+
+    max-width:640px;
+
+    position:relative;
+
+}
+
+.hero-banner .btn-primary{
+
+    background:linear-gradient(135deg, var(--primary), var(--primary-dark));
+
+    border:none;
+
+    box-shadow:0 8px 20px rgba(181,101,47,.4);
+
+}
+
+.hero-stamp{
+
+    position:absolute;
+
+    right:36px;
+
+    top:50%;
+
+    transform:translateY(-50%) rotate(-8deg);
+
+    border:2px solid rgba(217,154,91,.55);
+
+    border-radius:10px;
+
+    padding:10px 18px;
+
+    font-family:var(--font-display);
+
+    font-size:13px;
+
+    font-weight:700;
+
+    letter-spacing:2px;
+
+    text-transform:uppercase;
+
+    color:#d99a5b;
+
+    opacity:.85;
+
+}
+
+@media (max-width:768px){
+
+    .hero-stamp{
+
+        display:none;
+
+    }
+
+    .hero-banner{
+
+        padding:26px;
+
+    }
+
+    .hero-banner h2{
+
+        font-size:24px;
+
+    }
+
+}

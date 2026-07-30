@@ -18,15 +18,19 @@ class ExportService:
         writer = csv.writer(text_output)
 
         writer.writerow([
+            "Date",
             "Company",
-            "Email"
+            "Email",
+            "Website"
         ])
 
         for buyer in buyers:
 
             writer.writerow([
+                buyer.get("date", ""),
                 buyer.get("company", ""),
-                buyer.get("email", "")
+                buyer.get("email", ""),
+                buyer.get("website", "")
             ])
 
         text_output.flush()

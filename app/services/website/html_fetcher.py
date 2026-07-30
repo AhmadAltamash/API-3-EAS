@@ -12,6 +12,12 @@ class HTMLFetcher:
 
         }
 
+        # A shared session reuses TCP/TLS connections across requests,
+        # which is faster than opening a fresh connection every time.
+        self.session = requests.Session()
+
+        self.session.headers.update(self.headers)
+
     def fetch(self, url):
 
         if not url:
@@ -19,10 +25,9 @@ class HTMLFetcher:
 
         try:
 
-            response = requests.get(
+            response = self.session.get(
                 url,
-                headers=self.headers,
-                timeout=5,
+                timeout=4,
                 allow_redirects=True
             )
 

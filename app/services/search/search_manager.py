@@ -1,3 +1,5 @@
+from concurrent.futures import ThreadPoolExecutor, as_completed
+
 from .google_search import GoogleSearch
 from .facebook_search import FacebookSearch
 from .linkedin_search import LinkedInSearch
@@ -9,6 +11,10 @@ from app.services.filter.result_filter import ResultFilter
 
 
 class SearchManager:
+
+    # Website fetches are I/O-bound (waiting on network), so a thread pool
+    # gives a big speedup over processing results one at a time.
+    MAX_WORKERS = 20
 
     def __init__(self):
 
@@ -22,14 +28,25 @@ class SearchManager:
 
     def search(self, source, keyword):
 
-        pipeline = BuyerPipeline()
-
         all_results = []
 
         if source == "all":
 
-            for adapter in self.adapters.values():
-                all_results.extend(adapter.search(keyword))
+            # Query every source adapter concurrently too, since each one
+            # makes its own outbound search request.
+            with ThreadPoolExecutor(max_workers=len(self.adapters)) as executor:
+
+                futures = [
+                    executor.submit(adapter.search, keyword)
+                    for adapter in self.adapters.values()
+                ]
+
+                for future in as_completed(futures):
+
+                    try:
+                        all_results.extend(future.result())
+                    except Exception as e:
+                        print(f"[SearchManager] source error: {e}")
 
         else:
 
@@ -53,11 +70,25 @@ class SearchManager:
 
         buyers = []
 
-        for result in search_results:
+        # Process each candidate (fetch website, extract, classify US/email)
+        # in parallel - this is the step that used to run one URL at a time.
+        with ThreadPoolExecutor(max_workers=self.MAX_WORKERS) as executor:
 
-            buyer = pipeline.process(result)
+            futures = {
+                executor.submit(BuyerPipeline().process, result): result
+                for result in search_results
+            }
 
-            if buyer:
-                buyers.append(buyer)
+            for future in as_completed(futures):
+
+                try:
+
+                    buyer = future.result()
+
+                    if buyer:
+                        buyers.append(buyer)
+
+                except Exception as e:
+                    print(f"[SearchManager] pipeline error: {e}")
 
         return buyers

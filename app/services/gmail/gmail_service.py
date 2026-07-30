@@ -143,18 +143,12 @@ class GmailService:
         # Send Email
         # -------------------------
 
-        try:
+        # Deliberately NOT caught here: if the SMTP connection has dropped,
+        # this raises so the caller (CampaignService) can reconnect and
+        # retry, instead of silently marking every remaining buyer as
+        # failed for the rest of the run.
+        server.send_message(message)
 
-            server.send_message(message)
+        print(f"✓ Sent to {receiver}")
 
-            print(f"✓ Sent to {receiver}")
-
-            return True
-
-        except Exception as e:
-
-            print(f"✗ Failed to send to {receiver}")
-
-            print(e)
-
-            return False
+        return True

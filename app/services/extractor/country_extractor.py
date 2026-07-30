@@ -39,9 +39,28 @@ class CountryExtractor(BaseExtractor):
         "DC"
     ]
 
+    US_STATE_NAMES = [
+        "Alabama", "Alaska", "Arizona", "Arkansas", "California",
+        "Colorado", "Connecticut", "Delaware", "Florida", "Georgia",
+        "Hawaii", "Idaho", "Illinois", "Indiana", "Iowa", "Kansas",
+        "Kentucky", "Louisiana", "Maine", "Maryland", "Massachusetts",
+        "Michigan", "Minnesota", "Mississippi", "Missouri", "Montana",
+        "Nebraska", "Nevada", "New Hampshire", "New Jersey",
+        "New Mexico", "New York", "North Carolina", "North Dakota",
+        "Ohio", "Oklahoma", "Oregon", "Pennsylvania", "Rhode Island",
+        "South Carolina", "South Dakota", "Tennessee", "Texas",
+        "Utah", "Vermont", "Virginia", "Washington", "West Virginia",
+        "Wisconsin", "Wyoming"
+    ]
+
     # e.g. "Austin, TX 78701" or "TX 78701-1234"
     US_STATE_ZIP_PATTERN = re.compile(
         r"\b(" + "|".join(US_STATES) + r")\b\s+\d{5}(-\d{4})?"
+    )
+
+    # e.g. "Dallas, Texas 75214" - full state name followed by a zip code
+    US_STATE_NAME_ZIP_PATTERN = re.compile(
+        r"\b(" + "|".join(US_STATE_NAMES) + r")\b\s*,?\s*\d{5}(-\d{4})?"
     )
 
     # e.g. "+1 (555) 123-4567", "(555) 123-4567", "555-123-4567"
@@ -76,6 +95,10 @@ class CountryExtractor(BaseExtractor):
             return buyer
 
         if self.US_STATE_ZIP_PATTERN.search(text):
+            buyer.country = "United States"
+            return buyer
+
+        if self.US_STATE_NAME_ZIP_PATTERN.search(text):
             buyer.country = "United States"
             return buyer
 
