@@ -27,7 +27,7 @@ class GmailService:
             server = smtplib.SMTP(
                 "smtp.gmail.com",
                 587,
-                timeout=20
+                timeout=60
             )
 
             server.ehlo()
@@ -70,13 +70,31 @@ class GmailService:
 
             print(e)
 
+    def is_alive(self, server):
+        """
+        Cheap health check (SMTP NOOP) to catch a connection that's died
+        between sends - e.g. Gmail closed it, or a prior timeout left it
+        in a broken state - before attempting a real send (which would
+        otherwise waste time re-uploading an attachment only to fail).
+        """
+
+        if server is None:
+            return False
+
+        try:
+            status = server.noop()[0]
+            return status == 250
+        except Exception:
+            return False
+
     def send(
         self,
         server,
         receiver,
         subject,
         body,
-        attachment_paths=None
+        attachment_paths=None,
+        cc_emails=None
     ):
 
         sender = current_app.config.get("GMAIL_EMAIL")
@@ -85,6 +103,8 @@ class GmailService:
 
         message["From"] = sender
         message["To"] = receiver
+        if cc_emails:
+            message["Cc"] = ", ".join(cc_emails)
         message["Subject"] = subject
 
         message.attach(

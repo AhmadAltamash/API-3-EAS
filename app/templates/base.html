@@ -70,6 +70,18 @@
 
             <li>
 
+                <a href="/catalogue" class="{{ 'active' if request.path == '/catalogue' else '' }}">
+
+                    <i class="fa-solid fa-file-import"></i>
+
+                    Catalogue Analyzer
+
+                </a>
+
+            </li>
+
+            <li>
+
                 <a href="/search" class="{{ 'active' if request.path == '/search' else '' }}">
 
                     <i class="fa-solid fa-magnifying-glass"></i>
@@ -118,11 +130,11 @@
 
             <li>
 
-                <a href="/campaign/history" class="{{ 'active' if request.path == '/campaign/history' else '' }}">
+                <a href="/sent-companies" class="{{ 'active' if request.path == '/sent-companies' else '' }}">
 
-                    <i class="fa-solid fa-clock-rotate-left"></i>
+                    <i class="fa-solid fa-circle-check"></i>
 
-                    Campaign History
+                    Sent Companies
 
                 </a>
 
@@ -185,9 +197,9 @@
 
             <div class="usa-badge">
 
-                <i class="fa-solid fa-flag-usa"></i>
+                <i class="fa-solid fa-earth-americas"></i>
 
-                USA Buyers Only
+                USA & Canada Buyers
 
             </div>
 

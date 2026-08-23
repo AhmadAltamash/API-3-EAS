@@ -5,6 +5,7 @@ from app.services.gmail.gmail_service import GmailService
 from app.services.gmail.email_repository import EmailRepository
 from app.services.database.buyer_repository import BuyerRepository
 from app.services.database.campaign_repository import CampaignRepository
+from app.services.crm.stage_service import StageService
 
 
 class CampaignService:
@@ -27,13 +28,16 @@ class CampaignService:
 
         self.campaigns = CampaignRepository()
 
+        self.stages = StageService()
+
     def _send_with_retry(
         self,
         server,
         receiver,
         subject,
         body,
-        attachment_paths
+        attachment_paths,
+        cc_emails=None
     ):
         """
         Sends one email. If the SMTP connection has dropped (a common
@@ -51,7 +55,8 @@ class CampaignService:
                 receiver=receiver,
                 subject=subject,
                 body=body,
-                attachment_paths=attachment_paths
+                attachment_paths=attachment_paths,
+                cc_emails=cc_emails
             )
 
             return True, server
@@ -78,7 +83,8 @@ class CampaignService:
                     receiver=receiver,
                     subject=subject,
                     body=body,
-                    attachment_paths=attachment_paths
+                    attachment_paths=attachment_paths,
+                    cc_emails=cc_emails
                 )
 
                 return True, server
@@ -96,10 +102,11 @@ class CampaignService:
         send_all,
         subject,
         body,
-        attachment_paths=None
+        attachment_paths=None,
+        cc_emails=None
     ):
 
-        buyers = self.buyers.all()
+        buyers = self.buyers.contactable_buyers()
 
         sent = 0
         failed = 0
@@ -125,6 +132,17 @@ class CampaignService:
 
                 recipients += 1
 
+                if not self.gmail.is_alive(server):
+
+                    print("Connection appears dead - reconnecting before send")
+
+                    try:
+                        self.gmail.disconnect(server)
+                    except Exception:
+                        pass
+
+                    server = self.gmail.connect()
+
                 personalized_body = (
                     body
                     .replace("{{company}}", buyer.company or "")
@@ -136,7 +154,8 @@ class CampaignService:
                     receiver=buyer.email,
                     subject=subject,
                     body=personalized_body,
-                    attachment_paths=attachment_paths
+                    attachment_paths=attachment_paths,
+                    cc_emails=cc_emails
                 )
 
                 self.logs.save(
@@ -161,9 +180,16 @@ class CampaignService:
 
                     sent += 1
 
-                    # Remove the buyer once emailed so this (or a future)
-                    # campaign never sends to them again.
-                    self.buyers.delete(buyer.id)
+                    # Advance to Contacted instead of deleting the buyer -
+                    # contactable_buyers() above already excludes anyone
+                    # at Contacted or later, so this achieves the same
+                    # "never email the same company twice" goal while
+                    # keeping the record alive for the rest of the CRM
+                    # pipeline (Replied, Interested, Negotiation, etc).
+                    self.stages.advance_to(
+                        buyer, "Contacted",
+                        note=f"Emailed: {subject}"
+                    )
 
                 else:
                     failed += 1

@@ -1,0 +1,315 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="hero-banner d-flex justify-content-between align-items-center">
+
+    <div>
+
+        <div class="hero-eyebrow">
+
+            <i class="fa-solid fa-file-import"></i>
+
+            AI Catalogue Analyzer
+
+        </div>
+
+        <h2>
+
+            Catalogue Analyzer
+
+        </h2>
+
+        <p>
+
+            Upload your product catalogue and let AI figure out what you sell,
+            then generate buyer-focused search queries for the US and Canada —
+            instead of guessing keywords by hand.
+
+        </p>
+
+    </div>
+
+    <div class="hero-stamp">
+
+        AI Powered
+
+    </div>
+
+</div>
+
+<div class="card mb-4">
+
+    <div class="card-body">
+
+        <form method="POST" enctype="multipart/form-data" class="row g-3 align-items-end">
+
+            <div class="col-md-8">
+
+                <label class="form-label">
+
+                    Product Catalogue
+
+                </label>
+
+                <input
+                    type="file"
+                    class="form-control"
+                    name="catalogue_file"
+                    accept=".pdf,.docx,.txt,.csv"
+                    required>
+
+                <small class="text-muted">
+
+                    PDF, DOCX, or TXT — image-only/scanned PDFs aren't supported yet.
+
+                </small>
+
+            </div>
+
+            <div class="col-md-4">
+
+                <button type="submit" class="btn btn-primary w-100">
+
+                    <i class="fa-solid fa-wand-magic-sparkles me-2"></i>
+
+                    Analyze Catalogue
+
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+{% if analysis %}
+
+    <div class="row g-3 mb-4">
+
+        <div class="col-md-3">
+
+            <div class="stats-card stats-primary">
+
+                <i class="fa-solid fa-box"></i>
+
+                <h6>{{ analysis.products|length }} Products</h6>
+
+            </div>
+
+        </div>
+
+        <div class="col-md-3">
+
+            <div class="stats-card stats-info">
+
+                <i class="fa-solid fa-layer-group"></i>
+
+                <h6>{{ analysis.categories|length }} Categories</h6>
+
+            </div>
+
+        </div>
+
+        <div class="col-md-3">
+
+            <div class="stats-card stats-success">
+
+                <i class="fa-solid fa-industry"></i>
+
+                <h6>{{ analysis.industries|length }} Industries</h6>
+
+            </div>
+
+        </div>
+
+        <div class="col-md-3">
+
+            <div class="stats-card stats-warning">
+
+                <i class="fa-solid fa-user-tie"></i>
+
+                <h6>{{ analysis.buyer_types|length }} Buyer Types</h6>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="row g-3 mb-4">
+
+        <div class="col-md-6">
+
+            <div class="card h-100">
+
+                <div class="card-body">
+
+                    <h6 class="fw-bold mb-3">
+
+                        Products & Categories
+
+                    </h6>
+
+                    {% for p in analysis.products %}
+
+                        <span class="badge bg-secondary me-1 mb-1">{{ p }}</span>
+
+                    {% endfor %}
+
+                    <hr>
+
+                    {% for c in analysis.categories %}
+
+                        <span class="badge bg-light text-dark border me-1 mb-1">{{ c }}</span>
+
+                    {% endfor %}
+
+                    {% if analysis.materials %}
+
+                        <p class="text-muted mt-3 mb-0 small">
+
+                            Materials: {{ analysis.materials|join(", ") }}
+
+                        </p>
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="col-md-6">
+
+            <div class="card h-100">
+
+                <div class="card-body">
+
+                    <h6 class="fw-bold mb-3">
+
+                        Likely Buyer Types
+
+                    </h6>
+
+                    {% for b in analysis.buyer_types %}
+
+                        <span class="badge bg-primary me-1 mb-1">{{ b }}</span>
+
+                    {% endfor %}
+
+                    {% if analysis.industries %}
+
+                        <p class="text-muted mt-3 mb-0 small">
+
+                            Relevant industries: {{ analysis.industries|join(", ") }}
+
+                        </p>
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="card">
+
+        <div class="card-body">
+
+            <h6 class="fw-bold mb-3">
+
+                AI-Suggested Search Queries
+
+            </h6>
+
+            <p class="text-muted small mb-3">
+
+                Pick any query below to run buyer discovery immediately across
+                all sources (Google, Facebook, LinkedIn, Directories, Websites).
+
+            </p>
+
+            <div class="table-responsive">
+
+                <table class="table align-middle">
+
+                    <thead>
+
+                        <tr>
+
+                            <th>Search Query</th>
+
+                            <th>Country</th>
+
+                            <th>Why</th>
+
+                            <th></th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        {% for kw in analysis.keywords %}
+
+                        <tr>
+
+                            <td><strong>{{ kw.query }}</strong></td>
+
+                            <td>
+
+                                <span class="badge bg-light text-dark border">
+
+                                    {{ kw.country }}
+
+                                </span>
+
+                            </td>
+
+                            <td class="text-muted small">{{ kw.reason }}</td>
+
+                            <td class="text-end">
+
+                                <form method="POST" action="/search">
+
+                                    <input type="hidden" name="keyword" value="{{ kw.query }}">
+
+                                    <input type="hidden" name="source" value="all">
+
+                                    <button type="submit" class="btn btn-sm btn-outline-primary">
+
+                                        <i class="fa-solid fa-magnifying-glass me-1"></i>
+
+                                        Search
+
+                                    </button>
+
+                                </form>
+
+                            </td>
+
+                        </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+{% endif %}
+
+{% endblock %}

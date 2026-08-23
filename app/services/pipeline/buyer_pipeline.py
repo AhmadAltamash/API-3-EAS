@@ -28,27 +28,27 @@ class BuyerPipeline:
         buyer.snippet = search_result.snippet
         buyer.source = search_result.source
 
-        html = self.processor.process(
+        raw_html, clean_text = self.processor.process(
             buyer.website
         )
 
         buyer = self.company.extract(
             buyer,
-            html
+            raw_html
         )
 
         buyer = self.email.extract(
             buyer,
-            html
+            clean_text
         )
 
         buyer = self.country.extract(
             buyer,
-            html
+            clean_text
         )
 
-        # Only keep US-based buyers with a usable email - drop everything else
-        if buyer.country != "United States":
+        # Only keep US/Canada-based buyers with a usable email
+        if buyer.country not in ("United States", "Canada"):
             return None
 
         if not buyer.email:

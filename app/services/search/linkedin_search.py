@@ -12,7 +12,7 @@ class LinkedInSearch(BaseSearchAdapter):
 
         query = (
             f'site:linkedin.com/company "{keyword}" '
-            f'"United States" OR USA'
+            f'"United States" OR USA OR Canada'
         )
 
         try:

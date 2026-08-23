@@ -11,13 +11,17 @@ class WebsiteProcessor:
     def process(self, website):
 
         if not website:
-            return ""
+            return "", ""
 
         homepage = self.fetcher.fetch(website)
 
         if not homepage:
-            return ""
+            return "", ""
 
         # Only process the homepage.
         # Crawling multiple pages causes Render worker timeouts.
-        return self.cleaner.clean(homepage)
+        #
+        # Returns (raw_html, cleaned_text) - raw HTML is needed for things
+        # like the <title> tag, while the cleaned text is better for
+        # email/country pattern matching since scripts/styles are stripped.
+        return homepage, self.cleaner.clean(homepage)

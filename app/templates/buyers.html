@@ -158,6 +158,31 @@
 
                 </a>
 
+                <form
+                    action="{{ url_for('buyers.analyze_unscored') }}"
+                    method="POST"
+                    class="d-inline">
+
+                    <button class="btn btn-primary">
+
+                        <i class="fa-solid fa-wand-magic-sparkles me-2"></i>
+
+                        Analyze Next 5 Leads
+
+                    </button>
+
+                </form>
+
+                <a
+                    href="{{ url_for('buyers.add_inbound_lead') }}"
+                    class="btn btn-outline-primary">
+
+                    <i class="fa-solid fa-inbox me-2"></i>
+
+                    Add Inbound Lead
+
+                </a>
+
                 <a
                     href="/enrich"
                     class="btn btn-warning">
@@ -246,11 +271,17 @@
 
                             <th>Country</th>
 
+                            <th>Best Time to Email (IST)</th>
+
                             <th>Email</th>
 
                             <th>Website</th>
 
                             <th>Category</th>
+
+                            <th>Lead Score</th>
+
+                            <th>Stage</th>
 
                             <th>Source</th>
 
@@ -285,6 +316,48 @@
                         <td>
 
                             {{ item.country or "-" }}
+
+                            {% if item.state %}
+                                <span class="text-muted small">({{ item.state }})</span>
+                            {% endif %}
+
+                        </td>
+
+                        <td>
+
+                            {% set tinfo = send_time_info(item.country, item.state) %}
+
+                            {% if tinfo %}
+
+                                <div class="small">
+
+                                    <span class="badge bg-light text-dark border mb-1">
+
+                                        {{ tinfo.local_day }} {{ tinfo.local_time }} local
+
+                                    </span>
+
+                                    <br>
+
+                                    <strong>{{ tinfo.recommended_days }}</strong>,
+
+                                    {{ tinfo.primary_window_ist }}
+
+                                    {% if tinfo.precision == "country-default" %}
+
+                                        <br>
+
+                                        <span class="text-muted">(state unknown - country default)</span>
+
+                                    {% endif %}
+
+                                </div>
+
+                            {% else %}
+
+                                <span class="text-muted small">-</span>
+
+                            {% endif %}
 
                         </td>
 
@@ -361,6 +434,41 @@
 
                         <td>
 
+                            {% if item.lead_score is not none %}
+
+                                <a href="{{ url_for('buyers.buyer_detail', buyer_id=item.id) }}"
+                                   class="badge {{ 'bg-success' if item.outreach_priority == 'HIGH' else 'bg-warning text-dark' if item.outreach_priority == 'MEDIUM' else 'bg-secondary' }} text-decoration-none">
+
+                                    {{ item.lead_score }}/100 &middot; {{ item.outreach_priority }}
+
+                                </a>
+
+                            {% else %}
+
+                                <a href="{{ url_for('buyers.buyer_detail', buyer_id=item.id) }}"
+                                   class="badge bg-light text-dark border text-decoration-none">
+
+                                    Not analyzed
+
+                                </a>
+
+                            {% endif %}
+
+                        </td>
+
+                        <td>
+
+                            <a href="{{ url_for('buyers.buyer_detail', buyer_id=item.id) }}"
+                               class="badge {{ 'bg-success' if 'Won' in (item.pipeline_stage or '') else 'bg-danger' if 'Lost' in (item.pipeline_stage or '') else 'bg-primary' }} text-decoration-none">
+
+                                {{ item.pipeline_stage or "Discovered" }}
+
+                            </a>
+
+                        </td>
+
+                        <td>
+
                             <span class="badge bg-light text-dark">
 
                                 {{ item.source }}
@@ -375,18 +483,34 @@
 
                             <a
                             href="{{ url_for('classify.classify', buyer_id=item.id) }}"
-                            class="btn btn-success btn-sm">
+                            class="btn btn-success btn-sm"
+                            title="AI Classify">
 
                             <i class="fa-solid fa-robot"></i>
 
                             </a>
 
                             <form
+                            action="{{ url_for('buyers.analyze_buyer', buyer_id=item.id) }}"
+                            method="POST">
+
+                            <button
+                            class="btn btn-primary btn-sm"
+                            title="Analyze Lead">
+
+                            <i class="fa-solid fa-wand-magic-sparkles"></i>
+
+                            </button>
+
+                            </form>
+
+                            <form
                             action="{{ url_for('buyers.delete_one', buyer_id=item.id) }}"
                             method="POST">
 
                             <button
-                            class="btn btn-danger btn-sm">
+                            class="btn btn-danger btn-sm"
+                            title="Delete">
 
                             <i class="fa-solid fa-trash"></i>
 

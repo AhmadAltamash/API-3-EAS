@@ -1,0 +1,409 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="fade-up">
+
+    <div class="hero-banner d-flex justify-content-between align-items-center">
+
+        <div>
+
+            <div class="hero-eyebrow">
+
+                <i class="fa-solid fa-magnifying-glass-chart"></i>
+
+                Lead Intelligence
+
+            </div>
+
+            <h2>
+
+                {{ buyer.company }}
+
+            </h2>
+
+            <p>
+
+                {{ buyer.country or "-" }}{% if buyer.state %} ({{ buyer.state }}){% endif %}
+                &middot; {{ buyer.category or "Unknown" }}
+
+            </p>
+
+        </div>
+
+        <form method="POST" action="{{ url_for('buyers.analyze_buyer', buyer_id=buyer.id) }}">
+
+            <button type="submit" class="btn btn-primary">
+
+                <i class="fa-solid fa-wand-magic-sparkles me-2"></i>
+
+                {{ "Re-analyze" if buyer.analyzed_at else "Analyze" }}
+
+            </button>
+
+        </form>
+
+    </div>
+
+    <a href="{{ url_for('buyers.buyers') }}" class="btn btn-outline-secondary btn-sm mb-4">
+
+        <i class="fa-solid fa-arrow-left me-1"></i>
+
+        Back to Buyer Database
+
+    </a>
+
+    <!-- ================= CRM PIPELINE ================= -->
+
+    <div class="card mb-4">
+
+        <div class="card-header d-flex justify-content-between align-items-center">
+
+            <span>Sales Pipeline</span>
+
+            <span class="badge {{ 'bg-success' if 'Won' in (buyer.pipeline_stage or '') else 'bg-danger' if 'Lost' in (buyer.pipeline_stage or '') else 'bg-primary' }}">
+
+                {{ buyer.pipeline_stage or "Discovered" }}
+
+            </span>
+
+        </div>
+
+        <div class="card-body">
+
+            <div class="d-flex flex-wrap gap-2 mb-4">
+
+                {% for stage in stage_order %}
+
+                    {% set current_index = stage_order.index(buyer.pipeline_stage or "Discovered") %}
+                    {% set this_index = stage_order.index(stage) %}
+
+                    <span class="badge {{ 'bg-primary' if this_index == current_index else 'bg-success' if this_index < current_index else 'bg-light text-dark border' }}">
+
+                        {{ stage }}
+
+                    </span>
+
+                {% endfor %}
+
+            </div>
+
+            <form method="POST" action="{{ url_for('buyers.update_stage', buyer_id=buyer.id) }}" class="row g-2 align-items-end">
+
+                <div class="col-md-4">
+
+                    <label class="form-label small text-muted">Update Stage</label>
+
+                    <select class="form-select" name="stage" required>
+
+                        {% for stage in stage_order %}
+
+                            <option value="{{ stage }}" {{ "selected" if stage == buyer.pipeline_stage else "" }}>
+
+                                {{ stage }}
+
+                            </option>
+
+                        {% endfor %}
+
+                    </select>
+
+                </div>
+
+                <div class="col-md-6">
+
+                    <label class="form-label small text-muted">Note (optional)</label>
+
+                    <input type="text" class="form-control" name="note" placeholder="e.g. Called and left a voicemail">
+
+                </div>
+
+                <div class="col-md-2">
+
+                    <button type="submit" class="btn btn-primary w-100">
+
+                        Update
+
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+    <div class="card mb-4">
+
+        <div class="card-header">
+
+            Activity Timeline
+
+        </div>
+
+        <div class="card-body">
+
+            {% if timeline %}
+
+                <ul class="list-unstyled mb-0">
+
+                    {% for activity in timeline %}
+
+                        <li class="d-flex gap-3 pb-3 {{ '' if loop.last else 'border-bottom mb-3' }}">
+
+                            <div class="text-muted small" style="min-width: 130px;">
+
+                                {{ activity.created_at.strftime("%d-%m-%Y %H:%M") }}
+
+                            </div>
+
+                            <div>
+
+                                <strong>{{ activity.stage }}</strong>
+
+                                {% if activity.note %}
+                                    <div class="text-muted small">{{ activity.note }}</div>
+                                {% endif %}
+
+                            </div>
+
+                        </li>
+
+                    {% endfor %}
+
+                </ul>
+
+            {% else %}
+
+                <p class="text-muted mb-0">No activity recorded yet.</p>
+
+            {% endif %}
+
+        </div>
+
+    </div>
+
+    <!-- ================= LEAD INTELLIGENCE ================= -->
+
+    {% if not buyer.analyzed_at %}
+
+    <div class="card">
+
+        <div class="card-body text-center py-5">
+
+            <i class="fa-solid fa-magnifying-glass-chart fa-3x text-muted mb-3"></i>
+
+            <p class="text-muted mb-0">
+
+                This buyer hasn't been analyzed yet. Click "Analyze" above to
+                generate a product-match score, lead score, and decision-maker
+                scan.
+
+            </p>
+
+        </div>
+
+    </div>
+
+    {% else %}
+
+    <div class="row g-4 mb-4">
+
+        <div class="col-md-4">
+
+            <div class="stats-card {{ 'stats-success' if buyer.outreach_priority == 'HIGH' else 'stats-warning' if buyer.outreach_priority == 'MEDIUM' else 'stats-danger' }}">
+
+                <i class="fa-solid fa-gauge-high"></i>
+
+                <h6>Lead Score</h6>
+
+                <h2>{{ buyer.lead_score }}/100</h2>
+
+                <small class="text-muted">
+
+                    Outreach Priority: <strong>{{ buyer.outreach_priority }}</strong>
+
+                </small>
+
+            </div>
+
+        </div>
+
+        <div class="col-md-4">
+
+            <div class="stats-card stats-primary">
+
+                <i class="fa-solid fa-box"></i>
+
+                <h6>Product Match</h6>
+
+                <h2>
+
+                    {{ buyer.product_match_percent }}%
+                    {% if buyer.product_match_percent is none %}
+                        <span class="fs-6 text-muted">N/A</span>
+                    {% endif %}
+
+                </h2>
+
+                <small class="text-muted">
+
+                    vs. your uploaded catalogue
+
+                </small>
+
+            </div>
+
+        </div>
+
+        <div class="col-md-4">
+
+            <div class="stats-card stats-info">
+
+                <i class="fa-solid fa-envelope-circle-check"></i>
+
+                <h6>Email Domain</h6>
+
+                <h2>
+
+                    {% if buyer.email_domain_verified %}
+
+                        <span class="text-success">Verified</span>
+
+                    {% else %}
+
+                        <span class="text-danger">Unverified</span>
+
+                    {% endif %}
+
+                </h2>
+
+                <small class="text-muted">
+
+                    MX record check
+
+                </small>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="row g-4 mb-4">
+
+        <div class="col-md-6">
+
+            <div class="card h-100">
+
+                <div class="card-header">
+
+                    Company Profile
+
+                </div>
+
+                <div class="card-body">
+
+                    <table class="table table-borderless mb-0">
+
+                        <tr>
+                            <td class="text-muted" style="width:40%">Type</td>
+                            <td><strong>{{ buyer.category or "Unknown" }}</strong></td>
+                        </tr>
+
+                        <tr>
+                            <td class="text-muted">Relevant Categories</td>
+                            <td>{{ buyer.relevant_categories or "-" }}</td>
+                        </tr>
+
+                        <tr>
+                            <td class="text-muted">Style</td>
+                            <td>{{ buyer.style_estimate or "-" }}</td>
+                        </tr>
+
+                        <tr>
+                            <td class="text-muted">Estimated Positioning</td>
+                            <td>{{ buyer.positioning_estimate or "-" }}</td>
+                        </tr>
+
+                        <tr>
+                            <td class="text-muted">Likely Buyer</td>
+                            <td>
+
+                                {% if buyer.decision_maker_name %}
+
+                                    <strong>{{ buyer.decision_maker_name }}</strong>
+                                    &ndash; {{ buyer.decision_maker_title }}
+
+                                {% else %}
+
+                                    Not found &mdash; generic contact only
+
+                                {% endif %}
+
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="text-muted">Recommended Products</td>
+                            <td>{{ buyer.recommended_products or "-" }}</td>
+                        </tr>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="col-md-6">
+
+            <div class="card h-100">
+
+                <div class="card-header">
+
+                    Why This Score? (Lead Score Breakdown)
+
+                </div>
+
+                <div class="card-body">
+
+                    {% if buyer.lead_score_reasons %}
+
+                        <ul class="mb-0">
+
+                            {% for reason in buyer.lead_score_reasons.split("\n") %}
+
+                                <li>{{ reason }}</li>
+
+                            {% endfor %}
+
+                        </ul>
+
+                    {% else %}
+
+                        <p class="text-muted mb-0">No breakdown available.</p>
+
+                    {% endif %}
+
+                    <p class="text-muted small mt-3 mb-0">
+
+                        Analyzed {{ buyer.analyzed_at.strftime("%d-%m-%Y %H:%M") }} UTC
+
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    {% endif %}
+
+</div>
+
+{% endblock %}

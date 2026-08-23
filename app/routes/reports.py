@@ -2,6 +2,7 @@ from flask import Blueprint
 from flask import render_template
 
 from app.services.dashboard.dashboard_service import DashboardService
+from app.services.crm.stage_service import StageService
 
 reports_bp = Blueprint(
     "reports",
@@ -26,5 +27,7 @@ def reports():
         total_failed=data.get("total_failed", 0),
         success_rate=data.get("success_rate", 0),
 
-        recent_campaigns=data.get("recent_campaigns", [])
+        recent_campaigns=data.get("recent_campaigns", []),
+
+        pipeline_counts=StageService().counts_by_stage()
     )

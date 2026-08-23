@@ -149,6 +149,51 @@
     </div>
 
 
+    <!-- Sales Pipeline Funnel -->
+
+    <div class="card mb-4">
+
+        <div class="card-header">
+
+            Sales Pipeline Funnel
+
+        </div>
+
+        <div class="card-body">
+
+            {% set max_count = pipeline_counts|map(attribute=1)|max %}
+
+            {% for stage, count in pipeline_counts %}
+
+                <div class="d-flex align-items-center gap-3 mb-2">
+
+                    <div class="text-muted small" style="min-width: 160px;">
+
+                        {{ stage }}
+
+                    </div>
+
+                    <div class="flex-grow-1" style="background:var(--border); border-radius:6px; height:22px; overflow:hidden;">
+
+                        <div style="background:var(--primary); height:100%; width:{{ (count / max_count * 100) if max_count else 0 }}%;"></div>
+
+                    </div>
+
+                    <div class="fw-bold" style="min-width: 30px; text-align:right;">
+
+                        {{ count }}
+
+                    </div>
+
+                </div>
+
+            {% endfor %}
+
+        </div>
+
+    </div>
+
+
     <!-- Campaign History -->
 
     <div class="card">

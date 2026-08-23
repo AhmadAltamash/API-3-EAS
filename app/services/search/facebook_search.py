@@ -12,7 +12,7 @@ class FacebookSearch(BaseSearchAdapter):
 
         query = (
             f'site:facebook.com "{keyword}" '
-            f'"United States" OR USA'
+            f'"United States" OR USA OR Canada'
         )
 
         try:

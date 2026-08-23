@@ -31,9 +31,9 @@
 
         </div>
 
-        <a href="/campaign/history" class="btn btn-outline-light">
-            <i class="fa-solid fa-clock-rotate-left me-2"></i>
-            Campaign History
+        <a href="/sent-companies" class="btn btn-outline-light">
+            <i class="fa-solid fa-circle-check me-2"></i>
+            Sent Companies
         </a>
 
     </div>
@@ -71,6 +71,25 @@
                 name="subject"
                 placeholder="Premium Coffee Beans from Nepal"
                 required>
+
+        </div>
+
+        <div class="mb-3">
+
+            <label class="form-label">
+                CC <span class="text-muted">(Optional)</span>
+            </label>
+
+            <input
+                type="text"
+                class="form-control"
+                name="cc_emails"
+                placeholder="manager@example.com, sales@example.com">
+
+            <small class="text-muted">
+                Add one or multiple email addresses separated by commas.
+                These addresses will receive a copy of every campaign email.
+            </small>
 
         </div>
 

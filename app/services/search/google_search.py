@@ -13,7 +13,7 @@ class GoogleSearch(BaseSearchAdapter):
         # US-focused query
         query = (
             f'{keyword} importer OR wholesaler OR distributor '
-            f'"United States" OR USA'
+            f'"United States" OR USA OR Canada'
         )
 
         try:

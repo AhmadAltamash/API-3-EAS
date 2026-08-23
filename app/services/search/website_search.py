@@ -15,7 +15,7 @@ class WebsiteSearch(BaseSearchAdapter):
         # Directory adapters with independent business websites.
         query = (
             f'{keyword} company "contact us" '
-            f'"United States" OR USA'
+            f'"United States" OR USA OR Canada'
         )
 
         try:

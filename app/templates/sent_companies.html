@@ -1,0 +1,231 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="fade-up">
+
+    <div class="hero-banner d-flex justify-content-between align-items-center">
+
+        <div>
+
+            <div class="hero-eyebrow">
+
+                <i class="fa-solid fa-circle-check"></i>
+
+                Outreach History
+
+            </div>
+
+            <h2>
+
+                Sent Companies
+
+            </h2>
+
+            <p>
+
+                Every company you've successfully emailed, most recent first —
+                use this to track who's already been contacted.
+
+            </p>
+
+        </div>
+
+        <div class="hero-stamp">
+
+            {{ pagination.total }} Sent
+
+        </div>
+
+    </div>
+
+    <div class="card">
+
+        <div class="card-header d-flex justify-content-between align-items-center">
+
+            <span>
+
+                Successfully Emailed Companies
+
+            </span>
+
+            <span class="badge bg-success">
+
+                {{ pagination.total }} Total
+
+            </span>
+
+        </div>
+
+        <div class="card-body p-0">
+
+            {% if logs %}
+
+            <div class="table-responsive">
+
+                <table class="table align-middle">
+
+                    <thead>
+
+                        <tr>
+
+                            <th>Company</th>
+
+                            <th>Email</th>
+
+                            <th>Website</th>
+
+                            <th>Date</th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        {% for log in logs %}
+
+                        <tr>
+
+                            <td>
+
+                                <strong>{{ log.company or "-" }}</strong>
+
+                            </td>
+
+                            <td>
+
+                                <span class="badge bg-success">
+
+                                    {{ log.receiver }}
+
+                                </span>
+
+                            </td>
+
+                            <td>
+
+                                {% if log.website %}
+
+                                    <a
+                                        href="{{ log.website }}"
+                                        target="_blank"
+                                        class="btn btn-outline-primary btn-sm">
+
+                                        <i class="fa-solid fa-globe me-1"></i>
+
+                                        Visit
+
+                                    </a>
+
+                                {% else %}
+
+                                    -
+
+                                {% endif %}
+
+                            </td>
+
+                            <td>
+
+                                {{ log.sent_at.strftime("%d-%m-%Y") if log.sent_at else "-" }}
+
+                            </td>
+
+                        </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+            <!-- ================= PAGINATION ================= -->
+
+            <div class="d-flex justify-content-between align-items-center p-3">
+
+                <span class="text-muted small">
+
+                    Page {{ pagination.page }} of {{ pagination.pages if pagination.pages > 0 else 1 }}
+
+                </span>
+
+                <div class="d-flex gap-2">
+
+                    {% if pagination.has_prev %}
+
+                        <a
+                            href="{{ url_for('sent_companies.sent_companies', page=pagination.prev_num) }}"
+                            class="btn btn-outline-primary btn-sm">
+
+                            <i class="fa-solid fa-arrow-left me-1"></i>
+
+                            Previous
+
+                        </a>
+
+                    {% else %}
+
+                        <button class="btn btn-outline-secondary btn-sm" disabled>
+
+                            <i class="fa-solid fa-arrow-left me-1"></i>
+
+                            Previous
+
+                        </button>
+
+                    {% endif %}
+
+                    {% if pagination.has_next %}
+
+                        <a
+                            href="{{ url_for('sent_companies.sent_companies', page=pagination.next_num) }}"
+                            class="btn btn-outline-primary btn-sm">
+
+                            Next
+
+                            <i class="fa-solid fa-arrow-right ms-1"></i>
+
+                        </a>
+
+                    {% else %}
+
+                        <button class="btn btn-outline-secondary btn-sm" disabled>
+
+                            Next
+
+                            <i class="fa-solid fa-arrow-right ms-1"></i>
+
+                        </button>
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+            {% else %}
+
+            <div class="text-center py-5">
+
+                <i class="fa-solid fa-inbox fa-3x text-muted mb-3"></i>
+
+                <p class="text-muted mb-0">
+
+                    No companies emailed yet. Send a campaign to see them show up here.
+
+                </p>
+
+            </div>
+
+            {% endif %}
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

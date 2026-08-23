@@ -39,6 +39,14 @@ def campaign():
 
         attachment_paths = []
 
+        cc_emails = request.form.get("cc_emails", "").strip()
+        
+        cc_list = [
+            email.strip()
+            for email in cc_emails.split(",")
+            if email.strip()
+        ]
+
         if attachments:
 
             upload_folder = Path(current_app.root_path) / "uploads"
@@ -57,19 +65,13 @@ def campaign():
                 attachment_paths.append(str(attachment_path))
 
         result = CampaignService().send_campaign(
-
             campaign_name=campaign_name,
-
             categories=categories,
-
             send_all=send_all,
-
             subject=subject,
-
             body=body,
-
-            attachment_paths=attachment_paths
-
+            attachment_paths=attachment_paths,
+            cc_emails=cc_list
         )
 
         flash(
