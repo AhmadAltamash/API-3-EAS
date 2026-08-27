@@ -275,6 +275,8 @@
 
                             <th>Email</th>
 
+                            <th>Phone</th>
+
                             <th>Website</th>
 
                             <th>Category</th>
@@ -378,6 +380,22 @@
                                     No Email
 
                                 </span>
+
+                            {% endif %}
+
+                        </td>
+
+                        <td>
+
+                            {% if item.phone %}
+
+                                <span class="small">
+                                    {{ item.phone }}
+                                </span>
+
+                            {% else %}
+
+                                <span class="text-muted small">-</span>
 
                             {% endif %}
 

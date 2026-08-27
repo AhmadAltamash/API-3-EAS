@@ -88,6 +88,11 @@ class Buyer(db.Model):
 
     pipeline_stage = db.Column(db.String(50), default="Discovered")
 
+    # Toggled from the Sent Companies page: "did this company respond?"
+    # True moves the buyer to the Replied stage and makes them eligible
+    # for the Follow-Up Emails page/send.
+    needs_follow_up = db.Column(db.Boolean, default=False)
+
     created_at = db.Column(
         db.DateTime,
         default=datetime.utcnow
@@ -105,6 +110,8 @@ class EmailLog(db.Model):
         db.ForeignKey("buyers.id"),
         nullable=False
     )
+
+    buyer = db.relationship("Buyer", backref="email_logs")
 
     company = db.Column(db.String(255))
 

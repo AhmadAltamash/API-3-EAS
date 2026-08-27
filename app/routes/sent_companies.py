@@ -1,8 +1,11 @@
 from flask import Blueprint
+from flask import redirect
 from flask import render_template
 from flask import request
+from flask import url_for
 
 from app.services.gmail.email_repository import EmailRepository
+from app.services.database.buyer_repository import BuyerRepository
 
 sent_companies_bp = Blueprint(
     "sent_companies",
@@ -27,4 +30,26 @@ def sent_companies():
         "sent_companies.html",
         pagination=pagination,
         logs=pagination.items
+    )
+
+
+@sent_companies_bp.route(
+    "/sent-companies/follow-up/<int:buyer_id>",
+    methods=["POST"]
+)
+def toggle_follow_up(buyer_id):
+    """
+    "Did this company respond?" toggle next to each row. Yes marks the
+    buyer for the Follow-Up Emails page and advances their CRM stage
+    to Replied; No just clears the flag.
+    """
+
+    value = request.form.get("value") == "yes"
+
+    BuyerRepository().set_follow_up(buyer_id, value)
+
+    page = request.form.get("page", 1, type=int) or 1
+
+    return redirect(
+        url_for("sent_companies.sent_companies", page=page)
     )

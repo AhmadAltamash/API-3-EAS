@@ -8,6 +8,7 @@ from .website_search import WebsiteSearch
 
 from app.services.pipeline.buyer_pipeline import BuyerPipeline
 from app.services.filter.result_filter import ResultFilter
+from app.services.filter.relevance_filter import RelevanceFilter
 
 
 class SearchManager:
@@ -70,12 +71,22 @@ class SearchManager:
 
         buyers = []
 
+        # Load catalogue keywords ONCE here, in the request thread
+        # (has the Flask app context) - not inside the worker pool
+        # below, which doesn't. This also avoids re-querying the DB
+        # once per candidate.
+        relevance_keywords = RelevanceFilter().get_keywords()
+
         # Process each candidate (fetch website, extract, classify US/email)
         # in parallel - this is the step that used to run one URL at a time.
         with ThreadPoolExecutor(max_workers=self.MAX_WORKERS) as executor:
 
             futures = {
-                executor.submit(BuyerPipeline().process, result): result
+                executor.submit(
+                    BuyerPipeline().process,
+                    result,
+                    relevance_keywords
+                ): result
                 for result in search_results
             }
 

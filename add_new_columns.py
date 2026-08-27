@@ -16,6 +16,8 @@ already in it.
   - buyers.decision_maker_title     |
   - buyers.email_domain_verified    |
   - buyers.analyzed_at             /
+  - buyers.pipeline_stage           (Phase 4 CRM stage)
+  - buyers.needs_follow_up          (Sent Companies "responded?" toggle)
   - email_logs.website             (used by the Sent Companies page)
 
 NOTE: the app also runs this same check automatically on every startup
@@ -50,6 +52,7 @@ NEW_COLUMNS = [
     ("buyers", "email_domain_verified", "BOOLEAN"),
     ("buyers", "analyzed_at", "DATETIME"),
     ("buyers", "pipeline_stage", "VARCHAR(50)"),
+    ("buyers", "needs_follow_up", "BOOLEAN"),
     ("email_logs", "website", "VARCHAR(300)"),
 ]
 
@@ -169,6 +172,10 @@ def main():
             cursor.execute(
                 "UPDATE buyers SET pipeline_stage = 'Discovered' "
                 "WHERE pipeline_stage IS NULL"
+            )
+            cursor.execute(
+                "UPDATE buyers SET needs_follow_up = 0 "
+                "WHERE needs_follow_up IS NULL"
             )
             conn.commit()
 

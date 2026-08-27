@@ -1,6 +1,7 @@
 import time
 from datetime import datetime
 
+from app.extensions import db
 from app.services.gmail.gmail_service import GmailService
 from app.services.gmail.email_repository import EmailRepository
 from app.services.database.buyer_repository import BuyerRepository
@@ -212,6 +213,116 @@ class CampaignService:
 
         return {
             "campaign_name": campaign_name,
+            "sent": sent,
+            "failed": failed,
+            "total": recipients,
+            "report": report
+        }
+
+    def send_follow_up(
+        self,
+        subject,
+        body,
+        attachment_paths=None,
+        cc_emails=None
+    ):
+        """
+        Same send/retry/logging machinery as send_campaign(), but the
+        audience is buyers toggled "responded = Yes" on the Sent
+        Companies page (BuyerRepository.follow_up_buyers()) instead of
+        contactable_buyers(). A successful send clears needs_follow_up
+        so re-running this doesn't re-email the same company; a failed
+        send leaves it set so the next run retries them.
+        """
+
+        buyers = self.buyers.follow_up_buyers()
+
+        sent = 0
+        failed = 0
+        recipients = 0
+        report = []
+
+        run_date = datetime.now().strftime("%Y-%m-%d %H:%M")
+
+        server = self.gmail.connect()
+
+        try:
+
+            for buyer in buyers:
+
+                if recipients >= self.MAX_RECIPIENTS_PER_CAMPAIGN:
+                    break
+
+                if not buyer.email:
+                    continue
+
+                recipients += 1
+
+                if not self.gmail.is_alive(server):
+
+                    print("Connection appears dead - reconnecting before send")
+
+                    try:
+                        self.gmail.disconnect(server)
+                    except Exception:
+                        pass
+
+                    server = self.gmail.connect()
+
+                personalized_body = (
+                    body
+                    .replace("{{company}}", buyer.company or "")
+                    .replace("{{buyer_name}}", buyer.buyer_name or "")
+                )
+
+                success, server = self._send_with_retry(
+                    server=server,
+                    receiver=buyer.email,
+                    subject=subject,
+                    body=personalized_body,
+                    attachment_paths=attachment_paths,
+                    cc_emails=cc_emails
+                )
+
+                self.logs.save(
+                    buyer,
+                    subject,
+                    personalized_body,
+                    "Sent" if success else "Failed"
+                )
+
+                report.append({
+                    "date": run_date,
+                    "company": buyer.company,
+                    "email": buyer.email,
+                    "country": buyer.country,
+                    "category": buyer.category,
+                    "website": buyer.website,
+                    "source": buyer.source,
+                    "status": "Sent" if success else "Failed"
+                })
+
+                if success:
+
+                    sent += 1
+
+                    buyer.needs_follow_up = False
+                    db.session.commit()
+
+                    self.stages.log_activity(
+                        buyer.id, buyer.pipeline_stage or "Replied",
+                        note=f"Follow-up emailed: {subject}"
+                    )
+
+                else:
+                    failed += 1
+
+                time.sleep(self.SEND_DELAY_SECONDS)
+
+        finally:
+            self.gmail.disconnect(server)
+
+        return {
             "sent": sent,
             "failed": failed,
             "total": recipients,

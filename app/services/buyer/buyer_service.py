@@ -32,19 +32,31 @@ class BuyerService:
 
         saved_buyers = []
 
+        new_count = 0
+        duplicate_count = 0
+
         for buyer in buyers:
 
-            saved = self.repository.save(
+            saved, is_new = self.repository.save(
                 buyer
             )
 
             saved_buyers.append(saved)
 
+            if is_new:
+                new_count += 1
+            else:
+                duplicate_count += 1
+
         self.export.buyers_csv(
             self.repository.all()
         )
 
-        return saved_buyers
+        return {
+            "buyers": saved_buyers,
+            "new_count": new_count,
+            "duplicate_count": duplicate_count
+        }
 
     # -----------------------------
     # Get All Buyers

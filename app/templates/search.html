@@ -158,7 +158,138 @@
 
     </div>
 
+    <!-- ================= SMART QUERIES FROM CATALOGUE ================= -->
+
+    {% if smart_queries %}
+
+    <div class="card mb-4">
+
+        <div class="card-header d-flex justify-content-between align-items-center">
+
+            <div>
+
+                <i class="fa-solid fa-bullseye me-2"></i>
+
+                Smart Queries From Your Catalogue
+
+            </div>
+
+            <span class="badge bg-info text-dark">
+
+                {{ smart_queries|length }} Generated
+
+            </span>
+
+        </div>
+
+        <div class="card-body">
+
+            <p class="text-muted small mb-3">
+
+                Built from your uploaded catalogue's products combined with
+                buyer-type phrasing (trade program pages, boutiques, event
+                planners, etc). Each one runs as its own search - click
+                "Run" on whichever ones look useful, one or a few at a time.
+
+            </p>
+
+            <div class="table-responsive">
+
+                <table class="table table-sm align-middle mb-0">
+
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th>Buyer Type</th>
+                            <th>Query</th>
+                            <th>Source</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        {% for sq in smart_queries %}
+
+                        <tr>
+
+                            <td>{{ sq.product }}</td>
+
+                            <td>
+                                <span class="badge bg-light text-dark border">
+                                    {{ sq.buyer_type }}
+                                </span>
+                            </td>
+
+                            <td class="text-muted small">{{ sq.query }}</td>
+
+                            <td style="min-width: 140px;">
+
+                                <form method="POST" class="d-flex gap-1">
+
+                                    <input type="hidden" name="keyword" value="{{ sq.query }}">
+
+                                    <select name="source" class="form-select form-select-sm">
+                                        <option value="all">All Sources</option>
+                                        <option value="google">Google</option>
+                                        <option value="facebook">Facebook</option>
+                                        <option value="linkedin">LinkedIn</option>
+                                        <option value="directory">Directory</option>
+                                        <option value="website">Websites</option>
+                                    </select>
+
+                                    <button type="submit" class="btn btn-sm btn-outline-primary text-nowrap">
+                                        <i class="fa-solid fa-play me-1"></i> Run
+                                    </button>
+
+                                </form>
+
+                            </td>
+
+                        </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    {% endif %}
+
     <!-- ================= SEARCH RESULTS ================= -->
+
+    {% if search_summary %}
+
+    <div class="alert alert-info d-flex align-items-center gap-2 mb-3">
+
+        <i class="fa-solid fa-circle-info"></i>
+
+        <div>
+
+            <strong>{{ search_summary.new }}</strong> new compan{{ "y" if search_summary.new == 1 else "ies" }} saved.
+
+            {% if search_summary.duplicate %}
+
+                <strong>{{ search_summary.duplicate }}</strong>
+                {{ "was" if search_summary.duplicate == 1 else "were" }}
+                already in your database (same email or website as an
+                existing buyer) &mdash; not skipped, just not duplicated.
+                Any new details found (like a phone number) were merged
+                into their existing record instead.
+
+            {% endif %}
+
+        </div>
+
+    </div>
+
+    {% endif %}
 
     {% if buyers %}
 

@@ -10,26 +10,39 @@ class BuyerRepository:
 
     def save(self, buyer):
 
-        # Prevent duplicate websites
-        existing = Buyer.query.filter_by(
-            website=buyer.website
-        ).first()
+        # Prevent duplicate websites - guard against a falsy website
+        # short-circuit-matching some other record that also has no
+        # website on file yet (rare, but two different companies both
+        # showing website=None used to silently collapse into one).
+        existing = None
 
-        if existing:
-            return existing
+        if buyer.website:
+
+            existing = Buyer.query.filter_by(
+                website=buyer.website
+            ).first()
 
         # Prevent duplicate email addresses - the same inbox (often a
         # generic info@/sales@ address) can turn up on more than one page
         # of the same site and would otherwise be saved as two separate
         # buyer records, burning two campaign send-slots on one company.
-        if buyer.email:
+        if not existing and buyer.email:
 
-            existing_email = Buyer.query.filter_by(
+            existing = Buyer.query.filter_by(
                 email=buyer.email
             ).first()
 
-            if existing_email:
-                return existing_email
+        if existing:
+
+            # A duplicate isn't a dead end - it means this company is
+            # already tracked (possibly already in Sent Companies /
+            # mid-way through the CRM pipeline). Backfill anything this
+            # pass learned that the earlier save missed, so the record
+            # your Follow-Up/Sent Companies pages point to keeps
+            # improving instead of staying frozen at the first pass.
+            self._merge_new_info(existing, buyer)
+
+            return existing, False
 
         new_buyer = Buyer(
             company=buyer.company,
@@ -40,6 +53,7 @@ class BuyerRepository:
             country=buyer.country,
             source=buyer.source,
             category=buyer.category,
+            phone=buyer.phone,
             pipeline_stage="Discovered"
         )
 
@@ -52,7 +66,30 @@ class BuyerRepository:
             note=f"Found via {buyer.source or 'search'}"
         )
 
-        return new_buyer
+        return new_buyer, True
+
+    def _merge_new_info(self, existing, incoming):
+
+        changed = False
+
+        if incoming.phone and not existing.phone:
+            existing.phone = incoming.phone
+            changed = True
+
+        if incoming.country and not existing.country:
+            existing.country = incoming.country
+            changed = True
+
+        if incoming.snippet and not existing.snippet:
+            existing.snippet = incoming.snippet
+            changed = True
+
+        if incoming.buyer_name and not existing.buyer_name:
+            existing.buyer_name = incoming.buyer_name
+            changed = True
+
+        if changed:
+            db.session.commit()
 
     def get(self, buyer_id):
 
@@ -111,6 +148,46 @@ class BuyerRepository:
             db.session.commit()
 
         return buyer
+
+    def set_follow_up(self, buyer_id, needs_follow_up):
+        """
+        Used by the Sent Companies page toggle. Setting True also
+        advances the buyer to the "Replied" CRM stage (advance_to()
+        only moves forward, so this is safe to call repeatedly and
+        never regresses a stage a human has already moved further
+        along manually). Setting False just clears the flag - it
+        does not undo the stage, since a real reply did happen even
+        if the toggle was clicked by mistake and un-clicked.
+        """
+
+        buyer = Buyer.query.get(buyer_id)
+
+        if not buyer:
+            return None
+
+        buyer.needs_follow_up = needs_follow_up
+
+        db.session.commit()
+
+        if needs_follow_up:
+            self.stages.advance_to(
+                buyer, "Replied",
+                note="Marked as responded on Sent Companies page"
+            )
+
+        return buyer
+
+    def follow_up_buyers(self):
+        """
+        Buyers toggled "Yes" on Sent Companies and not yet re-cleared -
+        the audience for the Follow-Up Emails page/send.
+        """
+
+        return Buyer.query.filter_by(
+            needs_follow_up=True
+        ).order_by(
+            Buyer.id.desc()
+        ).all()
 
     def delete(self, buyer_id):
 

@@ -3,6 +3,7 @@ from flask import render_template
 from flask import request
 
 from app.services.buyer.buyer_service import BuyerService
+from app.services.search.query_template_service import QueryTemplateService
 
 search_bp = Blueprint(
     "search",
@@ -14,6 +15,7 @@ search_bp = Blueprint(
 def search():
 
     buyers = []
+    search_summary = None
 
     if request.method == "POST":
 
@@ -28,12 +30,23 @@ def search():
 
         buyer_service = BuyerService()
 
-        buyers = buyer_service.search_buyers(
+        result = buyer_service.search_buyers(
             keyword,
             source
         )
 
+        buyers = result["buyers"]
+
+        search_summary = {
+            "new": result["new_count"],
+            "duplicate": result["duplicate_count"]
+        }
+
+    smart_queries = QueryTemplateService().build_queries()
+
     return render_template(
         "search.html",
-        buyers=buyers
+        buyers=buyers,
+        search_summary=search_summary,
+        smart_queries=smart_queries
     )

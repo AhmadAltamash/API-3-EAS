@@ -1,67 +1,3 @@
-/* body{
-    background:#f4f6f9;
-    font-family:Segoe UI,Tahoma,Geneva,Verdana,sans-serif;
-}
-
-.sidebar{
-    position:fixed;
-    left:0;
-    top:0;
-    width:260px;
-    height:100vh;
-    background:#212529;
-    color:white;
-    overflow-y:auto;
-}
-
-.sidebar h3{
-    padding:25px;
-    text-align:center;
-    font-weight:bold;
-}
-
-.sidebar a{
-    display:block;
-    color:#ced4da;
-    padding:15px 25px;
-    text-decoration:none;
-    transition:.2s;
-}
-
-.sidebar a:hover{
-    background:#0d6efd;
-    color:white;
-}
-
-.main-content{
-    margin-left:260px;
-    padding:35px;
-}
-
-.card-stat{
-    border:none;
-    border-radius:15px;
-    box-shadow:0 5px 15px rgba(0,0,0,.08);
-    transition:.25s;
-}
-
-.card-stat:hover{
-    transform:translateY(-4px);
-}
-
-.card-stat i{
-    font-size:40px;
-}
-
-.table{
-    background:white;
-    border-radius:12px;
-}
-
-.page-title{
-    font-weight:bold;
-    margin-bottom:30px;
-} */
 /* ===========================
    GOOGLE FONTS
 =========================== */
@@ -110,6 +46,13 @@
 
     --font-display:'Space Grotesk',sans-serif;
 
+    /* Widths kept as variables so the sidebar/main-content offset and
+       the breakpoint-specific narrower sidebar always agree with each
+       other instead of being two numbers that have to be kept in sync
+       by hand in different places. */
+    --sidebar-width:270px;
+    --sidebar-width-lg:240px;
+
 }
 
 
@@ -129,6 +72,20 @@
 
 }
 
+html{
+
+    /* Belt-and-suspenders against ANY descendant (a wide table, an
+       unwrapped button row, a long unbroken string) forcing the whole
+       page wider than the viewport and dragging the fixed sidebar's
+       visible content sideways with it. Local horizontal scrolling
+       (e.g. inside .table-responsive) still works fine - this only
+       stops it from happening at the whole-page level. */
+    overflow-x:hidden;
+
+    width:100%;
+
+}
+
 body{
 
     background:var(--background);
@@ -139,6 +96,12 @@ body{
     background-size:22px 22px;
 
     color:var(--text);
+
+    overflow-x:hidden;
+
+    width:100%;
+
+    font-size:15px;
 
 }
 
@@ -162,6 +125,12 @@ h1, h2, h3, h4, h5, h6{
 
 }
 
+img{
+
+    max-width:100%;
+
+}
+
 
 /* ===========================
    LAYOUT
@@ -173,13 +142,29 @@ h1, h2, h3, h4, h5, h6{
 
     min-height:100vh;
 
+    width:100%;
+
+    overflow-x:hidden;
+
 }
 
 .main-content{
 
-    flex:1;
+    flex:1 1 auto;
 
-    margin-left:270px;
+    /* This is the actual fix for the "everything is too wide / cut off
+       on the right / buttons that should wrap don't" problem. Flex
+       items default to min-width:auto, which means a flex child will
+       refuse to shrink below the intrinsic width of whatever's inside
+       it - so one wide table further down the page was stretching this
+       entire column (and therefore every other card on the page) past
+       the viewport width. min-width:0 lets it actually respect the
+       available space, and each wide element (a table, a long row of
+       buttons) becomes responsible for scrolling/wrapping itself
+       instead of blowing out the whole layout. */
+    min-width:0;
+
+    margin-left:var(--sidebar-width);
 
     transition:.3s;
 
@@ -187,7 +172,11 @@ h1, h2, h3, h4, h5, h6{
 
 .page-content{
 
-    padding:30px;
+    padding:28px;
+
+    max-width:100%;
+
+    overflow-x:hidden;
 
 }
 
@@ -198,7 +187,7 @@ h1, h2, h3, h4, h5, h6{
 
 .sidebar{
 
-    width:270px;
+    width:var(--sidebar-width);
 
     position:fixed;
 
@@ -216,11 +205,17 @@ h1, h2, h3, h4, h5, h6{
 
     color:white;
 
-    overflow:auto;
-
     z-index:1000;
 
     box-shadow:5px 0 25px rgba(0,0,0,.15);
+
+    /* Flex column so the footer ("Version 1.0") is a normal document-
+       flow element that sits after the menu, not an absolutely
+       positioned one that floats on top of whatever menu item happens
+       to be at that pixel offset once enough nav links are added. */
+    display:flex;
+
+    flex-direction:column;
 
 }
 
@@ -233,6 +228,8 @@ h1, h2, h3, h4, h5, h6{
     gap:15px;
 
     padding:30px 25px;
+
+    flex-shrink:0;
 
 }
 
@@ -266,11 +263,21 @@ h1, h2, h3, h4, h5, h6{
 
     border-color:rgba(255,255,255,.08);
 
+    flex-shrink:0;
+
 }
 
 .sidebar-menu{
 
     padding:15px;
+
+    /* Takes up all the leftover height and scrolls its own contents
+       if there are more nav links than a short viewport can fit -
+       this is what actually stops "Version 1.0" (or any nav item)
+       from overlapping the last link, at any screen height. */
+    flex:1 1 auto;
+
+    overflow-y:auto;
 
 }
 
@@ -330,15 +337,22 @@ h1, h2, h3, h4, h5, h6{
 
 .sidebar-footer{
 
-    position:absolute;
+    /* No longer position:absolute - see .sidebar comment above. This
+       still visually sits at the bottom whenever there's spare height
+       (margin-top:auto inside the flex column), but simply flows
+       after the last nav link when there isn't, instead of covering
+       it. */
+    margin-top:auto;
 
-    bottom:20px;
+    flex-shrink:0;
 
     width:100%;
 
     text-align:center;
 
     color:#94a3b8;
+
+    padding:16px 15px;
 
 }
 
@@ -349,7 +363,7 @@ h1, h2, h3, h4, h5, h6{
 
 .topbar{
 
-    height:75px;
+    min-height:75px;
 
     background:white;
 
@@ -359,7 +373,11 @@ h1, h2, h3, h4, h5, h6{
 
     align-items:center;
 
-    padding:0 30px;
+    flex-wrap:wrap;
+
+    gap:10px;
+
+    padding:12px 30px;
 
     border-bottom:1px solid var(--border);
 
@@ -373,10 +391,9 @@ h1, h2, h3, h4, h5, h6{
 
 .topbar h3{
 
-    font-size:24px;
+    font-size:22px;
 
     font-weight:700;
-
 }
 
 .user-box{
@@ -396,6 +413,58 @@ h1, h2, h3, h4, h5, h6{
     font-size:28px;
 
     color:var(--primary);
+
+}
+
+/* ===========================
+   MOBILE SIDEBAR TOGGLE
+=========================== */
+
+.sidebar-toggle-btn{
+
+    display:none;
+
+    background:none;
+
+    border:none;
+
+    font-size:20px;
+
+    color:#1e293b;
+
+    cursor:pointer;
+
+    padding:6px 10px;
+
+    border-radius:8px;
+
+    line-height:1;
+
+}
+
+.sidebar-toggle-btn:hover{
+
+    background:rgba(0,0,0,.06);
+
+}
+
+.sidebar-overlay{
+
+    display:none;
+
+    position:fixed;
+
+    inset:0;
+
+    background:rgba(15,23,42,.5);
+
+    z-index:999;
+
+}
+
+.sidebar-overlay.active{
+
+    display:block;
 
 }
 
@@ -421,7 +490,10 @@ h1, h2, h3, h4, h5, h6{
 
     border-radius:30px;
 
+    white-space:nowrap;
+
 }
+
 /* ======================================================
    CARDS
 ====================================================== */
@@ -437,6 +509,8 @@ h1, h2, h3, h4, h5, h6{
     transition:.25s ease;
 
     overflow:hidden;
+
+    max-width:100%;
 
 }
 
@@ -456,13 +530,15 @@ h1, h2, h3, h4, h5, h6{
 
     font-weight:700;
 
-    padding:18px 24px;
+    padding:16px 22px;
 
 }
 
 .card-body{
 
-    padding:24px;
+    padding:22px;
+
+    max-width:100%;
 
 }
 
@@ -477,7 +553,7 @@ h1, h2, h3, h4, h5, h6{
 
     border-radius:16px;
 
-    padding:25px;
+    padding:22px;
 
     box-shadow:var(--shadow);
 
@@ -501,7 +577,7 @@ h1, h2, h3, h4, h5, h6{
 
     color:var(--muted);
 
-    font-size:14px;
+    font-size:13px;
 
     margin-bottom:12px;
 
@@ -513,7 +589,7 @@ h1, h2, h3, h4, h5, h6{
 
 .stats-card h2{
 
-    font-size:34px;
+    font-size:30px;
 
     font-weight:700;
 
@@ -529,7 +605,7 @@ h1, h2, h3, h4, h5, h6{
 
     top:25px;
 
-    font-size:45px;
+    font-size:40px;
 
     opacity:.12;
 
@@ -661,17 +737,19 @@ h1, h2, h3, h4, h5, h6{
 
     font-weight:700;
 
-    font-size:14px;
+    font-size:13px;
 
     text-transform:uppercase;
 
-    padding:18px;
+    padding:16px;
+
+    white-space:nowrap;
 
 }
 
 .table tbody td{
 
-    padding:18px;
+    padding:16px;
 
     border-color:#edf2f7;
 
@@ -689,6 +767,19 @@ h1, h2, h3, h4, h5, h6{
 
 }
 
+.table-responsive{
+
+    /* Bootstrap already sets this, but it's restated here so a wide
+       table's horizontal scroll is always contained to the table
+       itself - never the whole page - regardless of screen size. */
+    overflow-x:auto;
+
+    -webkit-overflow-scrolling:touch;
+
+    max-width:100%;
+
+}
+
 
 /* ======================================================
    BADGES
@@ -696,13 +787,15 @@ h1, h2, h3, h4, h5, h6{
 
 .badge{
 
-    padding:8px 14px;
+    padding:7px 13px;
 
     border-radius:30px;
 
     font-weight:600;
 
     font-size:12px;
+
+    white-space:nowrap;
 
 }
 
@@ -766,6 +859,8 @@ h1, h2, h3, h4, h5, h6{
 
     transition:.25s;
 
+    max-width:100%;
+
 }
 
 .form-select{
@@ -773,6 +868,8 @@ h1, h2, h3, h4, h5, h6{
     border-radius:10px;
 
     padding:12px 14px;
+
+    max-width:100%;
 
 }
 
@@ -926,6 +1023,8 @@ label{
 
     width:8px;
 
+    height:8px;
+
 }
 
 ::-webkit-scrollbar-track{
@@ -936,15 +1035,15 @@ label{
 
 ::-webkit-scrollbar-thumb{
 
-    background:#94a3b8;
+    background:#b8c2cc;
 
-    border-radius:20px;
+    border-radius:10px;
 
 }
 
 ::-webkit-scrollbar-thumb:hover{
 
-    background:#64748b;
+    background:#94a3b8;
 
 }
 
@@ -974,219 +1073,6 @@ label{
         opacity:1;
 
         transform:translateY(0);
-
-    }
-
-}
-/* ======================================================
-   RESPONSIVE DESIGN
-====================================================== */
-
-/* Large Laptops */
-
-@media (max-width:1400px){
-
-    .page-content{
-
-        padding:25px;
-
-    }
-
-    .stats-card{
-
-        padding:22px;
-
-    }
-
-}
-
-
-/* 15.6 Inch Laptop */
-
-@media (max-width:1366px){
-
-    .sidebar{
-
-        width:240px;
-
-    }
-
-    .main-content{
-
-        margin-left:240px;
-
-    }
-
-    .logo{
-
-        padding:25px 20px;
-
-    }
-
-    .sidebar-menu a{
-
-        padding:12px 15px;
-
-        font-size:15px;
-
-    }
-
-    .topbar{
-
-        height:70px;
-
-        padding:0 25px;
-
-    }
-
-    .topbar h3{
-
-        font-size:22px;
-
-    }
-
-    .page-content{
-
-        padding:20px;
-
-    }
-
-    .stats-card h2{
-
-        font-size:28px;
-
-    }
-
-}
-
-
-/* Tablets */
-
-@media (max-width:992px){
-
-    .sidebar{
-
-        left:-270px;
-
-        transition:.3s;
-
-    }
-
-    .sidebar.active{
-
-        left:0;
-
-    }
-
-    .main-content{
-
-        margin-left:0;
-
-    }
-
-    .topbar{
-
-        padding:15px 20px;
-
-        flex-wrap:wrap;
-
-        gap:10px;
-
-    }
-
-    .page-content{
-
-        padding:20px;
-
-    }
-
-}
-
-
-/* Mobile */
-
-@media (max-width:768px){
-
-    .topbar{
-
-        flex-direction:column;
-
-        align-items:flex-start;
-
-        height:auto;
-
-        padding:20px;
-
-    }
-
-    .user-box{
-
-        width:100%;
-
-        justify-content:flex-start;
-
-    }
-
-    .stats-card{
-
-        margin-bottom:20px;
-
-    }
-
-    .card-body{
-
-        padding:18px;
-
-    }
-
-    .table{
-
-        min-width:900px;
-
-    }
-
-    .table-responsive{
-
-        overflow-x:auto;
-
-    }
-
-    .btn{
-
-        width:100%;
-
-        margin-bottom:10px;
-
-    }
-
-}
-
-
-/* Small Mobile */
-
-@media (max-width:576px){
-
-    .page-content{
-
-        padding:15px;
-
-    }
-
-    .topbar h3{
-
-        font-size:18px;
-
-    }
-
-    .logo h4{
-
-        font-size:18px;
-
-    }
-
-    .logo span{
-
-        font-size:11px;
 
     }
 
@@ -1256,6 +1142,8 @@ label{
 
     font-size:22px;
 
+    flex-shrink:0;
+
 }
 
 .bg-blue{
@@ -1295,11 +1183,11 @@ label{
 
 .section-title{
 
-    font-size:26px;
+    font-size:24px;
 
     font-weight:700;
 
-    margin-bottom:25px;
+    margin-bottom:22px;
 
 }
 
@@ -1307,7 +1195,7 @@ label{
 
     color:var(--muted);
 
-    margin-bottom:30px;
+    margin-bottom:28px;
 
 }
 
@@ -1392,11 +1280,6 @@ label{
 
 
 /* ======================================================
-   END OF STYLE.CSS
-====================================================== */
-
-
-/* ======================================================
    HERO BANNER (signature page-header component)
 ====================================================== */
 
@@ -1406,11 +1289,13 @@ label{
 
     border-radius:20px;
 
-    padding:34px 38px;
+    padding:30px 34px;
 
-    margin-bottom:30px;
+    margin-bottom:28px;
 
     overflow:hidden;
+
+    max-width:100%;
 
     background:
         linear-gradient(120deg, #10192b 0%, #1c2c47 55%, #3a2a1c 100%);
@@ -1474,14 +1359,13 @@ label{
 
     font-family:var(--font-display);
 
-    font-size:30px;
+    font-size:27px;
 
     font-weight:700;
 
     margin-bottom:6px;
 
     position:relative;
-
 }
 
 .hero-banner p{
@@ -1536,7 +1420,213 @@ label{
 
 }
 
+
+/* ======================================================
+   RESPONSIVE DESIGN
+   Mobile-first-ish overrides layered on top of the desktop
+   defaults above, largest screens first so each breakpoint only
+   needs to state what's actually different from the one before it.
+====================================================== */
+
+/* Large Laptops */
+
+@media (max-width:1400px){
+
+    .page-content{
+
+        padding:24px;
+
+    }
+
+    .stats-card{
+
+        padding:20px;
+
+    }
+
+}
+
+
+/* 15.6 Inch Laptop */
+
+@media (max-width:1366px){
+
+    .sidebar{
+
+        width:var(--sidebar-width-lg);
+
+    }
+
+    .main-content{
+
+        margin-left:var(--sidebar-width-lg);
+
+    }
+
+    .logo{
+
+        padding:24px 18px;
+
+    }
+
+    .sidebar-menu a{
+
+        padding:12px 15px;
+
+        font-size:15px;
+
+    }
+
+    .topbar{
+
+        padding:12px 24px;
+
+    }
+
+    .topbar h3{
+
+        font-size:20px;
+
+    }
+
+    .page-content{
+
+        padding:20px;
+
+    }
+
+    .stats-card h2{
+
+        font-size:26px;
+
+    }
+
+    .hero-banner h2{
+
+        font-size:24px;
+
+    }
+
+}
+
+
+/* Tablets - the sidebar becomes an off-canvas drawer from here down */
+
+@media (max-width:992px){
+
+    .sidebar-toggle-btn{
+
+        display:inline-flex;
+
+        align-items:center;
+
+    }
+
+    .sidebar{
+
+        left:calc(-1 * var(--sidebar-width-lg));
+
+        transition:.3s;
+
+    }
+
+    .sidebar.active{
+
+        left:0;
+
+    }
+
+    .main-content{
+
+        margin-left:0;
+
+    }
+
+    .page-content{
+
+        padding:18px;
+
+    }
+}
+
+
+/* Mobile */
+
 @media (max-width:768px){
+
+    .topbar{
+
+        padding:16px 18px;
+
+    }
+
+    .card-body{
+
+        padding:16px;
+
+    }
+
+    .card-header{
+
+        padding:14px 16px;
+    }
+
+    .stats-card{
+
+        margin-bottom:18px;
+
+    }
+
+    .table{
+
+        min-width:900px;
+
+    }
+
+    /* Big page-level CTA buttons go full width and stack on mobile -
+       but not compact/table-embedded ones (toggle buttons, per-row
+       "Run" buttons, pagination arrows), which would look broken
+       stretched to 100% inside a table cell or an inline form. */
+    .btn:not(.btn-sm){
+
+        width:100%;
+
+        margin-bottom:10px;
+
+    }
+
+    .table-responsive .btn,
+    .table .btn,
+    td .btn{
+
+        width:auto;
+
+        margin-bottom:0;
+
+    }
+
+    /* Page-header banners and flex card headers (title + action button
+       side by side) need to stack instead of squeezing together once
+       the screen gets narrow. */
+    .hero-banner.d-flex{
+
+        flex-direction:column;
+
+        align-items:flex-start !important;
+
+        gap:16px;
+
+    }
+
+    .card-header.d-flex{
+
+        flex-direction:column;
+
+        align-items:flex-start !important;
+
+        gap:10px;
+
+    }
 
     .hero-stamp{
 
@@ -1546,13 +1636,64 @@ label{
 
     .hero-banner{
 
-        padding:26px;
+        padding:22px;
 
     }
 
     .hero-banner h2{
 
+        font-size:22px;
+
+    }
+
+}
+
+
+/* Small Mobile */
+
+@media (max-width:576px){
+
+    .page-content{
+
+        padding:14px;
+
+    }
+
+    .topbar h3{
+
+        font-size:17px;
+
+    }
+
+    .logo h4{
+
+        font-size:18px;
+
+    }
+
+    .logo span{
+
+        font-size:11px;
+
+    }
+
+    .hero-banner{
+
+        padding:18px;
+
+        border-radius:16px;
+
+    }
+
+    .stats-card h2{
+
         font-size:24px;
+
+    }
+
+    .card-body{
+
+        padding:14px;
 
     }
 

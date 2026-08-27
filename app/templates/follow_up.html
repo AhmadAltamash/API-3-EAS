@@ -1,0 +1,229 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container mt-4 fade-up">
+
+    <div class="hero-banner d-flex justify-content-between align-items-center">
+
+        <div>
+
+            <div class="hero-eyebrow">
+
+                <i class="fa-solid fa-arrow-rotate-right"></i>
+
+                Outreach
+
+            </div>
+
+            <h2>
+
+                Follow-Up Emails
+
+            </h2>
+
+            <p>
+
+                Sends only to companies toggled "Yes" on the Sent Companies page.
+                Up to 6 per run, same as a regular campaign. A dated CSV of the
+                run downloads automatically when it finishes.
+
+            </p>
+
+        </div>
+
+        <a href="/sent-companies" class="btn btn-outline-light">
+            <i class="fa-solid fa-circle-check me-2"></i>
+            Sent Companies
+        </a>
+
+    </div>
+
+    <div class="card mb-4">
+
+        <div class="card-header d-flex justify-content-between align-items-center">
+
+            <span>
+                Waiting for Follow-Up
+            </span>
+
+            <span class="badge {{ 'bg-success' if pending_buyers else 'bg-secondary' }}">
+                {{ pending_buyers|length }} Company{{ "" if pending_buyers|length == 1 else "ies" }}
+            </span>
+
+        </div>
+
+        {% if pending_buyers %}
+
+        <div class="card-body p-0">
+
+            <div class="table-responsive">
+
+                <table class="table align-middle mb-0">
+
+                    <thead>
+                        <tr>
+                            <th>Company</th>
+                            <th>Email</th>
+                            <th>Stage</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for buyer in pending_buyers %}
+                        <tr>
+                            <td><strong>{{ buyer.company }}</strong></td>
+                            <td>
+                                <span class="badge bg-success">{{ buyer.email }}</span>
+                            </td>
+                            <td>{{ buyer.pipeline_stage or "-" }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+        {% else %}
+
+        <div class="card-body text-center py-4">
+
+            <p class="text-muted mb-0">
+
+                Nobody's toggled "Yes" yet. Go to
+                <a href="/sent-companies">Sent Companies</a>
+                and mark a company as responded to add them here.
+
+            </p>
+
+        </div>
+
+        {% endif %}
+
+    </div>
+
+    {% if pending_buyers %}
+
+    <form method="POST" enctype="multipart/form-data">
+
+        <!-- Subject -->
+
+        <div class="mb-3">
+
+            <label class="form-label">
+                Subject
+            </label>
+
+            <input
+                type="text"
+                class="form-control"
+                name="subject"
+                placeholder="Re: Candle Holder Collection - Following Up"
+                required>
+
+        </div>
+
+        <!-- Message -->
+
+        <div class="mb-3">
+
+            <label class="form-label">
+                Message
+            </label>
+
+            <textarea
+                class="form-control"
+                rows="10"
+                name="body"
+                required
+            >Dear Sir/Madam,
+
+Following up on our earlier note about our Candle Holder Collection - happy to answer any questions, share pricing, or send additional samples of anything that caught your eye.
+
+Best Regards,
+Product Zone International
+Contact: Exportindia2026us@gmail.com</textarea>
+
+            <small class="text-muted">
+                Use <strong>{{ '{{company}}' }}</strong> to automatically insert each buyer's company name.
+            </small>
+
+        </div>
+
+        <!-- Attachment -->
+
+        <div class="mb-4">
+
+            <label class="form-label">
+                Attachments
+            </label>
+
+            <input
+                class="form-control"
+                type="file"
+                name="attachments"
+                multiple>
+
+            <small class="text-muted">
+                Optional &mdash; select one or more files (PDF, PNG, JPG, DOCX, XLSX, etc.)
+            </small>
+
+        </div>
+
+        <div class="d-flex gap-2">
+
+            <button type="submit" class="btn btn-primary">
+                🔁 Send Follow-Up
+            </button>
+
+            <button type="reset" class="btn btn-secondary">
+                Reset
+            </button>
+
+        </div>
+
+    </form>
+
+    {% endif %}
+
+    {% if result %}
+
+    <div class="card mt-5 border-success">
+
+        <div class="card-header bg-success text-white">
+            Follow-Up Run Summary
+        </div>
+
+        <div class="card-body">
+
+            <div class="row text-center">
+
+                <div class="col-md-4">
+                    <h3>{{ result.sent }}</h3>
+                    <p>Sent</p>
+                </div>
+
+                <div class="col-md-4">
+                    <h3>{{ result.failed }}</h3>
+                    <p>Failed</p>
+                </div>
+
+                <div class="col-md-4">
+                    <h3>{{ result.total }}</h3>
+                    <p>Total</p>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    {% endif %}
+
+</div>
+
+{% endblock %}

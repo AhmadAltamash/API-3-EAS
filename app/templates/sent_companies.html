@@ -77,6 +77,8 @@
 
                             <th>Date</th>
 
+                            <th>Responded?</th>
+
                         </tr>
 
                     </thead>
@@ -129,6 +131,34 @@
                             <td>
 
                                 {{ log.sent_at.strftime("%d-%m-%Y") if log.sent_at else "-" }}
+
+                            </td>
+
+                            <td>
+
+                                {% set responded = log.buyer.needs_follow_up if log.buyer else False %}
+
+                                <form
+                                    method="POST"
+                                    action="{{ url_for('sent_companies.toggle_follow_up', buyer_id=log.buyer_id) }}"
+                                    class="d-inline">
+
+                                    <input type="hidden" name="page" value="{{ pagination.page }}">
+                                    <input type="hidden" name="value" value="{{ 'no' if responded else 'yes' }}">
+
+                                    <button
+                                        type="submit"
+                                        class="btn btn-sm {{ 'btn-success' if responded else 'btn-outline-secondary' }}">
+
+                                        {% if responded %}
+                                            <i class="fa-solid fa-check me-1"></i> Yes
+                                        {% else %}
+                                            No
+                                        {% endif %}
+
+                                    </button>
+
+                                </form>
 
                             </td>
 

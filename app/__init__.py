@@ -14,6 +14,7 @@ from .routes.search import search_bp
 from app.routes.enrichment import enrichment_bp
 from app.routes.sent_companies import sent_companies_bp
 from app.routes.catalogue import catalogue_bp
+from app.routes.follow_up import follow_up_bp
 
 from app.services.timezone.send_time_service import SendTimeService
 
@@ -40,6 +41,7 @@ def create_app():
     app.register_blueprint(enrichment_bp)
     app.register_blueprint(sent_companies_bp)
     app.register_blueprint(catalogue_bp)
+    app.register_blueprint(follow_up_bp)
 
     # Lets templates call send_time_info(country, state) directly,
     # e.g. in buyers.html to show each buyer's local/IST send window.
@@ -108,9 +110,11 @@ def _ensure_new_columns(app):
             ("email_domain_verified", "BOOLEAN"),
             ("analyzed_at", "DATETIME"),
             ("pipeline_stage", "VARCHAR(50)"),
+            ("needs_follow_up", "BOOLEAN"),
         ]
 
         added_pipeline_stage = False
+        added_needs_follow_up = False
 
         for column_name, column_type in new_buyer_columns:
 
@@ -124,6 +128,9 @@ def _ensure_new_columns(app):
                 if column_name == "pipeline_stage":
                     added_pipeline_stage = True
 
+                if column_name == "needs_follow_up":
+                    added_needs_follow_up = True
+
         if added_pipeline_stage:
 
             # ALTER TABLE ADD COLUMN doesn't apply the model's Python-side
@@ -136,6 +143,17 @@ def _ensure_new_columns(app):
             ))
             db.session.commit()
             print("[schema check] Backfilled existing buyers to pipeline_stage='Discovered'")
+
+        if added_needs_follow_up:
+
+            # Same story: existing rows get NULL, not the Python-side
+            # False default, until backfilled once.
+            db.session.execute(text(
+                "UPDATE buyers SET needs_follow_up = 0 "
+                "WHERE needs_follow_up IS NULL"
+            ))
+            db.session.commit()
+            print("[schema check] Backfilled existing buyers to needs_follow_up=False")
 
     if "email_logs" in existing_tables:
 
