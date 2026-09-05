@@ -1,5 +1,4 @@
 from pathlib import Path
-
 from flask import Blueprint
 from flask import flash
 from flask import redirect

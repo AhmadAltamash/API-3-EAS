@@ -39,19 +39,55 @@
 
     </div>
 
+    <div class="card mb-4">
+
+        <div class="card-body">
+
+            <form method="GET" class="d-flex gap-2 flex-wrap">
+
+                <input
+                    type="text"
+                    name="q"
+                    value="{{ email_query }}"
+                    class="form-control"
+                    style="max-width:360px;"
+                    placeholder="Search by email address...">
+
+                <button type="submit" class="btn btn-primary">
+                    <i class="fa-solid fa-magnifying-glass me-1"></i> Search
+                </button>
+
+                {% if email_query %}
+
+                    <a href="{{ url_for('sent_companies.sent_companies') }}" class="btn btn-outline-secondary">
+                        Clear
+                    </a>
+
+                {% endif %}
+
+            </form>
+
+        </div>
+
+    </div>
+
     <div class="card">
 
         <div class="card-header d-flex justify-content-between align-items-center">
 
             <span>
 
-                Successfully Emailed Companies
+                {% if email_query %}
+                    Search Results for "{{ email_query }}"
+                {% else %}
+                    Successfully Emailed Companies
+                {% endif %}
 
             </span>
 
             <span class="badge bg-success">
 
-                {{ pagination.total }} Total
+                {{ pagination.total }} {{ "Match" if email_query else "Total" }}{{ "es" if email_query and pagination.total != 1 else "" }}
 
             </span>
 
@@ -144,6 +180,7 @@
                                     class="d-inline">
 
                                     <input type="hidden" name="page" value="{{ pagination.page }}">
+                                    <input type="hidden" name="q" value="{{ email_query }}">
                                     <input type="hidden" name="value" value="{{ 'no' if responded else 'yes' }}">
 
                                     <button
@@ -187,7 +224,7 @@
                     {% if pagination.has_prev %}
 
                         <a
-                            href="{{ url_for('sent_companies.sent_companies', page=pagination.prev_num) }}"
+                            href="{{ url_for('sent_companies.sent_companies', page=pagination.prev_num, q=email_query or None) }}"
                             class="btn btn-outline-primary btn-sm">
 
                             <i class="fa-solid fa-arrow-left me-1"></i>
@@ -211,7 +248,7 @@
                     {% if pagination.has_next %}
 
                         <a
-                            href="{{ url_for('sent_companies.sent_companies', page=pagination.next_num) }}"
+                            href="{{ url_for('sent_companies.sent_companies', page=pagination.next_num, q=email_query or None) }}"
                             class="btn btn-outline-primary btn-sm">
 
                             Next
@@ -242,11 +279,23 @@
 
                 <i class="fa-solid fa-inbox fa-3x text-muted mb-3"></i>
 
-                <p class="text-muted mb-0">
+                {% if email_query %}
 
-                    No companies emailed yet. Send a campaign to see them show up here.
+                    <p class="text-muted mb-0">
 
-                </p>
+                        No sent companies match "{{ email_query }}".
+
+                    </p>
+
+                {% else %}
+
+                    <p class="text-muted mb-0">
+
+                        No companies emailed yet. Send a campaign to see them show up here.
+
+                    </p>
+
+                {% endif %}
 
             </div>
 

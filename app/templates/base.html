@@ -94,6 +94,31 @@
 
             <li>
 
+                <a href="/discover" class="{{ 'active' if request.path == '/discover' else '' }}">
+
+                    <i class="fa-solid fa-wand-magic-sparkles"></i>
+
+                    AI Discovery
+                    <span class="badge bg-warning text-dark ms-1" style="font-size:9px;">BETA</span>
+
+                </a>
+
+            </li>
+
+            <li>
+
+                <a href="/import-leads" class="{{ 'active' if request.path == '/import-leads' else '' }}">
+
+                    <i class="fa-solid fa-file-csv"></i>
+
+                    Import Leads (CSV)
+
+                </a>
+
+            </li>
+
+            <li>
+
                 <a href="/buyers" class="{{ 'active' if request.path == '/buyers' else '' }}">
 
                     <i class="fa-solid fa-users"></i>

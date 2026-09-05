@@ -18,6 +18,10 @@ already in it.
   - buyers.analyzed_at             /
   - buyers.pipeline_stage           (Phase 4 CRM stage)
   - buyers.needs_follow_up          (Sent Companies "responded?" toggle)
+  - buyers.email_live_verified      (True = this app fetched the live page
+                                      and found the email itself; False =
+                                      came from AI recall or a CSV import,
+                                      never independently confirmed)
   - email_logs.website             (used by the Sent Companies page)
 
 NOTE: the app also runs this same check automatically on every startup
@@ -53,6 +57,7 @@ NEW_COLUMNS = [
     ("buyers", "analyzed_at", "DATETIME"),
     ("buyers", "pipeline_stage", "VARCHAR(50)"),
     ("buyers", "needs_follow_up", "BOOLEAN"),
+    ("buyers", "email_live_verified", "BOOLEAN"),
     ("email_logs", "website", "VARCHAR(300)"),
 ]
 
@@ -176,6 +181,16 @@ def main():
             cursor.execute(
                 "UPDATE buyers SET needs_follow_up = 0 "
                 "WHERE needs_follow_up IS NULL"
+            )
+            cursor.execute(
+                "UPDATE buyers SET email_live_verified = 1 "
+                "WHERE email_live_verified IS NULL "
+                "AND (source IS NULL OR source NOT IN ('CSV Import', 'Manual Entry'))"
+            )
+            cursor.execute(
+                "UPDATE buyers SET email_live_verified = 0 "
+                "WHERE email_live_verified IS NULL "
+                "AND source IN ('CSV Import', 'Manual Entry')"
             )
             conn.commit()
 

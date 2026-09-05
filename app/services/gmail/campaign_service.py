@@ -224,7 +224,8 @@ class CampaignService:
         subject,
         body,
         attachment_paths=None,
-        cc_emails=None
+        cc_emails=None,
+        extra_emails=None
     ):
         """
         Same send/retry/logging machinery as send_campaign(), but the
@@ -233,9 +234,35 @@ class CampaignService:
         contactable_buyers(). A successful send clears needs_follow_up
         so re-running this doesn't re-email the same company; a failed
         send leaves it set so the next run retries them.
+
+        extra_emails: addresses that aren't in the buyer database at
+        all (e.g. handed to you by an intern) - each gets turned into
+        a lightweight Buyer record (source="Manual Entry") so it's
+        logged/trackable the same as everyone else, and is placed
+        first in the send order so it's not the one left out if the
+        per-run cap is reached.
         """
 
-        buyers = self.buyers.follow_up_buyers()
+        manual_buyers = []
+
+        for email in (extra_emails or []):
+
+            email = (email or "").strip()
+
+            if email:
+                manual_buyers.append(
+                    self.buyers.find_or_create_manual(email)
+                )
+
+        queued_buyers = self.buyers.follow_up_buyers()
+
+        # A manually-added address might already be sitting in the
+        # toggled-Yes queue too - don't email it twice in the same run.
+        manual_ids = {b.id for b in manual_buyers}
+
+        buyers = manual_buyers + [
+            b for b in queued_buyers if b.id not in manual_ids
+        ]
 
         sent = 0
         failed = 0

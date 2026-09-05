@@ -1,0 +1,174 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container mt-4 fade-up">
+
+    <div class="hero-banner d-flex justify-content-between align-items-center">
+
+        <div>
+
+            <div class="hero-eyebrow">
+
+                <i class="fa-solid fa-file-csv"></i>
+
+                For manually-curated leads
+
+            </div>
+
+            <h2>
+
+                Import Leads (CSV)
+
+            </h2>
+
+            <p>
+
+                Bring in a list from anywhere - a colleague's spreadsheet,
+                a manual ChatGPT/Gemini/Grok session you copy-pasted into
+                a sheet, a paid scraper's export. No live verification
+                needed here - since a person already curated it, it goes
+                straight into your buyer database with the same dedup
+                checks as every other lead source.
+
+            </p>
+
+        </div>
+
+        <a href="/buyers" class="btn btn-outline-light">
+            <i class="fa-solid fa-users me-2"></i>
+            Buyer Database
+        </a>
+
+    </div>
+
+    <div class="card mb-4">
+
+        <div class="card-header">
+            Upload
+        </div>
+
+        <div class="card-body">
+
+            <form method="POST" enctype="multipart/form-data">
+
+                <div class="mb-3">
+
+                    <label class="form-label">
+                        CSV / TSV file
+                    </label>
+
+                    <input
+                        type="file"
+                        name="csv_file"
+                        class="form-control"
+                        accept=".csv,.tsv,.txt"
+                        required>
+
+                    <small class="text-muted">
+
+                        Works with or without a header row, comma or
+                        tab-separated. If there's no header, it figures
+                        out which column is the email and which is the
+                        website by looking at what's actually in them -
+                        column order doesn't matter.
+
+                    </small>
+
+                </div>
+
+                <button type="submit" class="btn btn-primary">
+                    <i class="fa-solid fa-upload me-1"></i>
+                    Import
+                </button>
+
+            </form>
+
+        </div>
+
+    </div>
+
+    {% if result %}
+
+    <div class="card">
+
+        <div class="card-header d-flex justify-content-between align-items-center">
+
+            <span>Import Results</span>
+
+            <span class="text-muted small">
+
+                {{ result.new_count }} new &middot;
+                {{ result.duplicate_count }} already known &middot;
+                {{ result.invalid_count }} invalid
+
+            </span>
+
+        </div>
+
+        <div class="card-body p-0">
+
+            <div class="table-responsive">
+
+                <table class="table align-middle mb-0">
+
+                    <thead>
+                        <tr>
+                            <th>Company</th>
+                            <th>Email</th>
+                            <th>Website</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        {% for row in result.details %}
+
+                        <tr>
+
+                            <td><strong>{{ row.company }}</strong></td>
+
+                            <td>{{ row.email }}</td>
+
+                            <td>
+
+                                {% if row.website %}
+                                    <span class="small">{{ row.website }}</span>
+                                {% else %}
+                                    <span class="text-muted small">-</span>
+                                {% endif %}
+
+                            </td>
+
+                            <td>
+
+                                {% if row.status == "saved" %}
+                                    <span class="badge bg-success">New</span>
+                                {% elif row.status == "duplicate" %}
+                                    <span class="badge bg-info">Already Known</span>
+                                {% else %}
+                                    <span class="badge bg-danger">Invalid</span>
+                                {% endif %}
+
+                            </td>
+
+                        </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    {% endif %}
+
+</div>
+
+{% endblock %}

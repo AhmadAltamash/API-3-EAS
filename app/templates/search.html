@@ -67,24 +67,86 @@
 
                 <div class="row g-3">
 
-                    <div class="col-lg-7">
+                    <div class="col-lg-3 col-md-6">
 
                         <label class="form-label">
 
-                            Search Keyword
+                            Product
 
                         </label>
 
                         <input
                             type="text"
                             class="form-control"
-                            name="keyword"
-                            placeholder="Example: Rice Importers, Tea Buyers, Textile Companies"
+                            name="product"
+                            placeholder="Example: Candle Holders"
+                            value="{{ last_query.product if last_query else '' }}"
                             required>
 
                     </div>
 
-                    <div class="col-lg-3">
+                    <div class="col-lg-2 col-md-6">
+
+                        <label class="form-label">
+
+                            Country
+
+                        </label>
+
+                        <select class="form-select" id="countrySelect" name="country">
+
+                            <option value="" {{ "selected" if not last_query or not last_query.country else "" }}>Either</option>
+
+                            <option value="United States" {{ "selected" if last_query and last_query.country == "United States" else "" }}>United States</option>
+
+                            <option value="Canada" {{ "selected" if last_query and last_query.country == "Canada" else "" }}>Canada</option>
+
+                        </select>
+
+                    </div>
+
+                    <div class="col-lg-2 col-md-6">
+
+                        <label class="form-label">
+
+                            State <span class="text-muted small">(optional)</span>
+
+                        </label>
+
+                        <select class="form-select" id="stateSelect" name="state" data-selected="{{ last_query.state if last_query else '' }}">
+
+                            <option value="">Any State</option>
+
+                        </select>
+
+                    </div>
+
+                    <div class="col-lg-2 col-md-6">
+
+                        <label class="form-label">
+
+                            City <span class="text-muted small">(optional)</span>
+
+                        </label>
+
+                        <input
+                            type="text"
+                            class="form-control"
+                            id="cityInput"
+                            name="city"
+                            list="cityDatalist"
+                            placeholder="Houston, or a ZIP code"
+                            value="{{ last_query.city if last_query else '' }}">
+
+                        <datalist id="cityDatalist"></datalist>
+
+                        <small class="text-muted">
+                            Pick a suggestion or type any city/ZIP.
+                        </small>
+
+                    </div>
+
+                    <div class="col-lg-2 col-md-6">
 
                         <label class="form-label">
 
@@ -132,11 +194,17 @@
 
                             </option>
 
+                            <option value="serpapi">
+
+                                SerpApi (Real Google Data)
+
+                            </option>
+
                         </select>
 
                     </div>
 
-                    <div class="col-lg-2 d-flex align-items-end">
+                    <div class="col-lg-1 col-md-6 d-flex align-items-end">
 
                         <button
                             type="submit"
@@ -190,6 +258,9 @@
                 buyer-type phrasing (trade program pages, boutiques, event
                 planners, etc). Each one runs as its own search - click
                 "Run" on whichever ones look useful, one or a few at a time.
+                If you pick SerpApi as the source, remember each row spends
+                one of your 250 free monthly searches - fine for a few
+                targeted rows, easy to burn through if you run all of them.
 
             </p>
 
@@ -236,6 +307,7 @@
                                         <option value="linkedin">LinkedIn</option>
                                         <option value="directory">Directory</option>
                                         <option value="website">Websites</option>
+                                        <option value="serpapi">SerpApi</option>
                                     </select>
 
                                     <button type="submit" class="btn btn-sm btn-outline-primary text-nowrap">
@@ -266,11 +338,33 @@
 
     {% if search_summary %}
 
+    {% set source_labels = {
+        "all": "All Sources (DuckDuckGo-based)",
+        "google": "Google (actually DuckDuckGo underneath - see note below)",
+        "facebook": "Facebook (DuckDuckGo-based)",
+        "linkedin": "LinkedIn (DuckDuckGo-based)",
+        "directory": "Business Directory (DuckDuckGo-based)",
+        "website": "Company Websites (DuckDuckGo-based)",
+        "serpapi": "SerpApi (real Google data)"
+    } %}
+
     <div class="alert alert-info d-flex align-items-center gap-2 mb-3">
 
         <i class="fa-solid fa-circle-info"></i>
 
         <div>
+
+            <div class="mb-1">
+
+                <span class="badge {{ 'bg-success' if search_summary.source == 'serpapi' else 'bg-secondary' }}">
+
+                    <i class="fa-solid {{ 'fa-check' if search_summary.source == 'serpapi' else 'fa-magnifying-glass' }} me-1"></i>
+
+                    Ran on: {{ source_labels.get(search_summary.source, search_summary.source) }}
+
+                </span>
+
+            </div>
 
             <strong>{{ search_summary.new }}</strong> new compan{{ "y" if search_summary.new == 1 else "ies" }} saved.
 
@@ -282,6 +376,18 @@
                 existing buyer) &mdash; not skipped, just not duplicated.
                 Any new details found (like a phone number) were merged
                 into their existing record instead.
+
+            {% endif %}
+
+            {% if search_summary.source != "serpapi" %}
+
+                <div class="text-muted small mt-1">
+
+                    This ran on the free DuckDuckGo-based backend, not real
+                    Google data. Pick "SerpApi (Real Google Data)" from the
+                    Search Source dropdown above to compare.
+
+                </div>
 
             {% endif %}
 
@@ -511,5 +617,153 @@
     {% endif %}
 
 </div>
+
+<script>
+
+    // Major cities per state/province - not exhaustive (small towns and
+    // ZIP codes still work fine, just type them into City directly; this
+    // is only a quick-pick suggestion list, not a restriction).
+    const LOCATIONS = {
+        "United States": {
+            "Alabama": ["Birmingham", "Montgomery", "Huntsville", "Mobile"],
+            "Alaska": ["Anchorage", "Fairbanks", "Juneau"],
+            "Arizona": ["Phoenix", "Tucson", "Mesa", "Scottsdale"],
+            "Arkansas": ["Little Rock", "Fayetteville", "Fort Smith"],
+            "California": ["Los Angeles", "San Francisco", "San Diego", "Sacramento", "San Jose", "Oakland", "Fresno", "Long Beach"],
+            "Colorado": ["Denver", "Colorado Springs", "Aurora", "Boulder"],
+            "Connecticut": ["Hartford", "New Haven", "Stamford", "Bridgeport"],
+            "Delaware": ["Wilmington", "Dover"],
+            "District of Columbia": ["Washington"],
+            "Florida": ["Miami", "Orlando", "Tampa", "Jacksonville", "Fort Lauderdale", "St. Petersburg", "Tallahassee"],
+            "Georgia": ["Atlanta", "Savannah", "Augusta", "Columbus"],
+            "Hawaii": ["Honolulu", "Hilo"],
+            "Idaho": ["Boise", "Idaho Falls"],
+            "Illinois": ["Chicago", "Springfield", "Naperville", "Peoria"],
+            "Indiana": ["Indianapolis", "Fort Wayne", "Evansville"],
+            "Iowa": ["Des Moines", "Cedar Rapids", "Davenport"],
+            "Kansas": ["Wichita", "Overland Park", "Kansas City"],
+            "Kentucky": ["Louisville", "Lexington"],
+            "Louisiana": ["New Orleans", "Baton Rouge", "Shreveport"],
+            "Maine": ["Portland", "Augusta"],
+            "Maryland": ["Baltimore", "Annapolis", "Rockville"],
+            "Massachusetts": ["Boston", "Worcester", "Cambridge", "Springfield"],
+            "Michigan": ["Detroit", "Grand Rapids", "Ann Arbor", "Lansing"],
+            "Minnesota": ["Minneapolis", "St. Paul", "Rochester"],
+            "Mississippi": ["Jackson", "Gulfport"],
+            "Missouri": ["Kansas City", "St. Louis", "Springfield"],
+            "Montana": ["Billings", "Missoula", "Helena"],
+            "Nebraska": ["Omaha", "Lincoln"],
+            "Nevada": ["Las Vegas", "Reno", "Henderson"],
+            "New Hampshire": ["Manchester", "Concord"],
+            "New Jersey": ["Newark", "Jersey City", "Trenton", "Princeton"],
+            "New Mexico": ["Albuquerque", "Santa Fe"],
+            "New York": ["New York City", "Buffalo", "Rochester", "Albany", "Syracuse"],
+            "North Carolina": ["Charlotte", "Raleigh", "Durham", "Greensboro"],
+            "North Dakota": ["Fargo", "Bismarck"],
+            "Ohio": ["Columbus", "Cleveland", "Cincinnati", "Toledo"],
+            "Oklahoma": ["Oklahoma City", "Tulsa"],
+            "Oregon": ["Portland", "Eugene", "Salem"],
+            "Pennsylvania": ["Philadelphia", "Pittsburgh", "Harrisburg", "Allentown"],
+            "Rhode Island": ["Providence"],
+            "South Carolina": ["Charleston", "Columbia", "Greenville"],
+            "South Dakota": ["Sioux Falls", "Rapid City"],
+            "Tennessee": ["Nashville", "Memphis", "Knoxville", "Chattanooga"],
+            "Texas": ["Houston", "Dallas", "Austin", "San Antonio", "Fort Worth", "El Paso"],
+            "Utah": ["Salt Lake City", "Provo"],
+            "Vermont": ["Burlington", "Montpelier"],
+            "Virginia": ["Virginia Beach", "Richmond", "Norfolk", "Arlington"],
+            "Washington": ["Seattle", "Spokane", "Tacoma", "Bellevue"],
+            "West Virginia": ["Charleston", "Huntington"],
+            "Wisconsin": ["Milwaukee", "Madison", "Green Bay"],
+            "Wyoming": ["Cheyenne", "Casper"]
+        },
+        "Canada": {
+            "Alberta": ["Calgary", "Edmonton"],
+            "British Columbia": ["Vancouver", "Victoria", "Surrey"],
+            "Manitoba": ["Winnipeg"],
+            "New Brunswick": ["Moncton", "Saint John"],
+            "Newfoundland and Labrador": ["St. John's"],
+            "Northwest Territories": ["Yellowknife"],
+            "Nova Scotia": ["Halifax"],
+            "Nunavut": ["Iqaluit"],
+            "Ontario": ["Toronto", "Ottawa", "Mississauga", "Hamilton", "London"],
+            "Prince Edward Island": ["Charlottetown"],
+            "Quebec": ["Montreal", "Quebec City", "Laval"],
+            "Saskatchewan": ["Saskatoon", "Regina"],
+            "Yukon": ["Whitehorse"]
+        }
+    };
+
+    (function () {
+
+        const countrySelect = document.getElementById("countrySelect");
+        const stateSelect = document.getElementById("stateSelect");
+        const cityInput = document.getElementById("cityInput");
+        const cityDatalist = document.getElementById("cityDatalist");
+
+        if (!countrySelect || !stateSelect || !cityInput || !cityDatalist) {
+            return;
+        }
+
+        function statesForCountry(country) {
+
+            if (country === "United States" || country === "Canada") {
+                return LOCATIONS[country];
+            }
+
+            // "Either" - combine both, US states first
+            return Object.assign({}, LOCATIONS["United States"], LOCATIONS["Canada"]);
+        }
+
+        function populateStates(preselect) {
+
+            const states = statesForCountry(countrySelect.value);
+
+            const sortedNames = Object.keys(states).sort();
+
+            stateSelect.innerHTML = '<option value="">Any State</option>';
+
+            sortedNames.forEach(function (name) {
+                const opt = document.createElement("option");
+                opt.value = name;
+                opt.textContent = name;
+                stateSelect.appendChild(opt);
+            });
+
+            if (preselect && sortedNames.includes(preselect)) {
+                stateSelect.value = preselect;
+            }
+
+            populateCities();
+        }
+
+        function populateCities() {
+
+            const states = statesForCountry(countrySelect.value);
+
+            const cities = states[stateSelect.value] || [];
+
+            cityDatalist.innerHTML = "";
+
+            cities.forEach(function (city) {
+                const opt = document.createElement("option");
+                opt.value = city;
+                cityDatalist.appendChild(opt);
+            });
+        }
+
+        countrySelect.addEventListener("change", function () {
+            populateStates(null);
+        });
+
+        stateSelect.addEventListener("change", populateCities);
+
+        // Restore the previously-searched state (if any) on page load,
+        // e.g. after a search runs and the page re-renders.
+        populateStates(stateSelect.getAttribute("data-selected") || null);
+
+    })();
+
+</script>
 
 {% endblock %}

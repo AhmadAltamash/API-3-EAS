@@ -5,6 +5,7 @@ from .facebook_search import FacebookSearch
 from .linkedin_search import LinkedInSearch
 from .directory_search import DirectorySearch
 from .website_search import WebsiteSearch
+from .serpapi_search import SerpApiSearch
 
 from app.services.pipeline.buyer_pipeline import BuyerPipeline
 from app.services.filter.result_filter import ResultFilter
@@ -27,11 +28,22 @@ class SearchManager:
             "website": WebsiteSearch(),
         }
 
+        # Kept OUT of self.adapters on purpose - "all" fans out across
+        # every adapter in that dict, and SerpApi's free tier is a
+        # scarce 250/month. Only spend one of those credits when the
+        # source is explicitly chosen, never as a side effect of a
+        # routine "All Sources" search.
+        self.serpapi = SerpApiSearch()
+
     def search(self, source, keyword):
 
         all_results = []
 
-        if source == "all":
+        if source == "serpapi":
+
+            all_results = self.serpapi.search(keyword)
+
+        elif source == "all":
 
             # Query every source adapter concurrently too, since each one
             # makes its own outbound search request.

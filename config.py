@@ -19,3 +19,5 @@ class Config:
     GMAIL_APP_PASSWORD = os.getenv("GMAIL_APP_PASSWORD")
 
     GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+
+    SERPAPI_KEY = os.getenv("SERPAPI_KEY")

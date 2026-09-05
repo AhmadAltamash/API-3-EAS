@@ -11,7 +11,8 @@ class ResultFilter:
         "tradewheel.com",
         "alibaba.com",
         "statista.com",
-        "oec.world"
+        "oec.world",
+        "yelp.com"
     ]
 
     BLOCKED_WORDS = [

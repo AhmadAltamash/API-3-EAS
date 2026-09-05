@@ -15,6 +15,8 @@ from app.routes.enrichment import enrichment_bp
 from app.routes.sent_companies import sent_companies_bp
 from app.routes.catalogue import catalogue_bp
 from app.routes.follow_up import follow_up_bp
+from app.routes.discover import discover_bp
+from app.routes.import_leads import import_leads_bp
 
 from app.services.timezone.send_time_service import SendTimeService
 
@@ -42,6 +44,8 @@ def create_app():
     app.register_blueprint(sent_companies_bp)
     app.register_blueprint(catalogue_bp)
     app.register_blueprint(follow_up_bp)
+    app.register_blueprint(discover_bp)
+    app.register_blueprint(import_leads_bp)
 
     # Lets templates call send_time_info(country, state) directly,
     # e.g. in buyers.html to show each buyer's local/IST send window.
@@ -111,10 +115,12 @@ def _ensure_new_columns(app):
             ("analyzed_at", "DATETIME"),
             ("pipeline_stage", "VARCHAR(50)"),
             ("needs_follow_up", "BOOLEAN"),
+            ("email_live_verified", "BOOLEAN"),
         ]
 
         added_pipeline_stage = False
         added_needs_follow_up = False
+        added_email_live_verified = False
 
         for column_name, column_type in new_buyer_columns:
 
@@ -130,6 +136,9 @@ def _ensure_new_columns(app):
 
                 if column_name == "needs_follow_up":
                     added_needs_follow_up = True
+
+                if column_name == "email_live_verified":
+                    added_email_live_verified = True
 
         if added_pipeline_stage:
 
@@ -154,6 +163,26 @@ def _ensure_new_columns(app):
             ))
             db.session.commit()
             print("[schema check] Backfilled existing buyers to needs_follow_up=False")
+
+        if added_email_live_verified:
+
+            # Every buyer that existed before this column was added got
+            # here through the real fetch-and-extract pipeline (Search /
+            # AI Discovery's verified path) - EXCEPT CSV/manual imports,
+            # which were never independently confirmed. Backfill
+            # accordingly instead of leaving everyone at NULL.
+            db.session.execute(text(
+                "UPDATE buyers SET email_live_verified = 1 "
+                "WHERE email_live_verified IS NULL "
+                "AND (source IS NULL OR source NOT IN ('CSV Import', 'Manual Entry'))"
+            ))
+            db.session.execute(text(
+                "UPDATE buyers SET email_live_verified = 0 "
+                "WHERE email_live_verified IS NULL "
+                "AND source IN ('CSV Import', 'Manual Entry')"
+            ))
+            db.session.commit()
+            print("[schema check] Backfilled existing buyers' email_live_verified by source")
 
     if "email_logs" in existing_tables:
 

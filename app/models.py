@@ -80,6 +80,14 @@ class Buyer(db.Model):
 
     email_domain_verified = db.Column(db.Boolean)
 
+    # Distinct from email_domain_verified above (which only checks the
+    # domain has valid MX records). This tracks provenance: True means
+    # this app fetched the live page itself and found the email there;
+    # False/None means it came from somewhere we didn't independently
+    # confirm - Gemini's own knowledge (AI Discovery, when the target
+    # site blocks our fetcher) or a manually-curated CSV import.
+    email_live_verified = db.Column(db.Boolean)
+
     analyzed_at = db.Column(db.DateTime)
 
     # -------------------------------------------------------------

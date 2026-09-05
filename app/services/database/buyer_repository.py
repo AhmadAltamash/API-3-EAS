@@ -54,6 +54,8 @@ class BuyerRepository:
             source=buyer.source,
             category=buyer.category,
             phone=buyer.phone,
+            email_live_verified=getattr(buyer, "email_live_verified", None),
+            product_match_percent=getattr(buyer, "product_match_percent", None),
             pipeline_stage="Discovered"
         )
 
@@ -86,6 +88,31 @@ class BuyerRepository:
 
         if incoming.buyer_name and not existing.buyer_name:
             existing.buyer_name = incoming.buyer_name
+            changed = True
+
+        # A later live-confirmed find should upgrade an earlier
+        # unverified record - never the other way around (an
+        # unverified re-find shouldn't downgrade a confirmed one).
+        if getattr(incoming, "email_live_verified", None) and not existing.email_live_verified:
+            existing.email_live_verified = True
+            changed = True
+
+        # Same "only ever improve, never downgrade" rule for the
+        # relevance score - a re-find that happened to see stronger
+        # keyword evidence (e.g. a company-name match this time
+        # instead of only a snippet match before) should raise the
+        # stored score; a weaker rediscovery shouldn't erase a
+        # stronger one already on file, and an AI-refined score from
+        # the Phase 3 "Analyze" step should never get overwritten by
+        # this cheap keyword estimate either.
+        incoming_score = getattr(incoming, "product_match_percent", None)
+
+        if (
+            incoming_score is not None
+            and (existing.product_match_percent is None or incoming_score > existing.product_match_percent)
+            and existing.analyzed_at is None
+        ):
+            existing.product_match_percent = incoming_score
             changed = True
 
         if changed:
@@ -188,6 +215,45 @@ class BuyerRepository:
         ).order_by(
             Buyer.id.desc()
         ).all()
+
+    def find_or_create_manual(self, email):
+        """
+        Used by the Follow-Up Emails page's "extra email" field, for
+        addresses an intern hands you that aren't in the buyer database
+        yet (not found by a search, not toggled from Sent Companies).
+        Reuses the normal email-dedup rule - if this address is already
+        a known buyer, that existing record is used (and gains a
+        Follow-Up activity entry) rather than creating a second one.
+        """
+
+        email = email.strip().lower()
+
+        existing = Buyer.query.filter_by(email=email).first()
+
+        if existing:
+            return existing
+
+        domain = email.split("@")[-1] if "@" in email else "unknown"
+
+        buyer = Buyer(
+            company=f"Manual Contact ({domain})",
+            email=email,
+            source="Manual Entry",
+            category="Manual",
+            email_live_verified=False,
+            pipeline_stage="Discovered"
+        )
+
+        db.session.add(buyer)
+        db.session.commit()
+
+        self.stages.log_activity(
+            buyer.id,
+            "Discovered",
+            note="Added manually on the Follow-Up Emails page"
+        )
+
+        return buyer
 
     def delete(self, buyer_id):
 

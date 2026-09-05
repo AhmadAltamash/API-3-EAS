@@ -1,0 +1,231 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container mt-4 fade-up">
+
+    <div class="hero-banner d-flex justify-content-between align-items-center">
+
+        <div>
+
+            <div class="hero-eyebrow">
+
+                <i class="fa-solid fa-wand-magic-sparkles"></i>
+
+                Beta - separate from Search Buyers
+
+            </div>
+
+            <h2>
+
+                AI Discovery
+
+            </h2>
+
+            <p>
+
+                Asks Gemini to name real, well-known US/Canada companies
+                that fit your catalogue, then tries to verify each one by
+                actually fetching their site. If a major company's site
+                blocks automated fetching (common for big retailers) but
+                Gemini has genuine knowledge of a published trade email,
+                that's used as a fallback - always clearly labeled
+                "AI-recalled, unverified" so you can judge it yourself,
+                never presented as if this app confirmed it.
+
+            </p>
+
+        </div>
+
+        <a href="/search" class="btn btn-outline-light">
+            <i class="fa-solid fa-magnifying-glass me-2"></i>
+            Search Buyers
+        </a>
+
+    </div>
+
+    <div class="card mb-4">
+
+        <div class="card-header">
+            Run a Discovery Batch
+        </div>
+
+        <div class="card-body">
+
+            <form method="POST">
+
+                <div class="row g-3 align-items-end">
+
+                    <div class="col-md-7">
+
+                        <label class="form-label">
+                            Buyer type (optional)
+                        </label>
+
+                        <input
+                            type="text"
+                            name="buyer_type_hint"
+                            class="form-control"
+                            placeholder="e.g. boutique hotels, event planners, interior designers - leave blank for a mix">
+
+                    </div>
+
+                    <div class="col-md-3">
+
+                        <label class="form-label">
+                            Batch size
+                        </label>
+
+                        <select name="batch_size" class="form-select">
+                            <option value="5">5</option>
+                            <option value="10">10</option>
+                            <option value="12" selected>12</option>
+                            <option value="20">20</option>
+                        </select>
+
+                    </div>
+
+                    <div class="col-md-2">
+
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="fa-solid fa-wand-magic-sparkles me-1"></i>
+                            Run
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+    {% if result %}
+
+    <div class="card mb-4">
+
+        <div class="card-header d-flex justify-content-between align-items-center">
+
+            <span>Run Results</span>
+
+            <span class="text-muted small">
+
+                {{ result.new_count }} new &middot;
+                {{ result.duplicate_count }} already known &middot;
+                {{ result.skipped_count }} skipped
+
+            </span>
+
+        </div>
+
+        <div class="card-body p-0">
+
+            <div class="table-responsive">
+
+                <table class="table align-middle mb-0">
+
+                    <thead>
+                        <tr>
+                            <th>Company</th>
+                            <th>Website</th>
+                            <th>Email Found</th>
+                            <th>Source</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        {% for row in result.details %}
+
+                        <tr>
+
+                            <td><strong>{{ row.company }}</strong></td>
+
+                            <td>
+
+                                {% if row.website %}
+                                    <a href="{{ row.website }}" target="_blank" class="small">
+                                        {{ row.website }}
+                                    </a>
+                                {% else %}
+                                    <span class="text-muted small">-</span>
+                                {% endif %}
+
+                            </td>
+
+                            <td>
+
+                                {% if row.email %}
+                                    <span class="badge bg-success">{{ row.email }}</span>
+                                {% else %}
+                                    <span class="text-muted small">-</span>
+                                {% endif %}
+
+                            </td>
+
+                            <td>
+
+                                {% if row.verified is sameas true %}
+                                    <span class="badge bg-success">
+                                        <i class="fa-solid fa-check"></i> Live-verified
+                                    </span>
+                                {% elif row.verified is sameas false %}
+                                    <span class="badge bg-warning text-dark">
+                                        <i class="fa-solid fa-robot"></i> AI-recalled, unverified
+                                    </span>
+                                {% else %}
+                                    <span class="text-muted small">-</span>
+                                {% endif %}
+
+                            </td>
+
+                            <td>
+
+                                {% if row.status == "saved" %}
+                                    <span class="badge bg-success">New</span>
+                                {% elif row.status == "duplicate" %}
+                                    <span class="badge bg-info">Already Known</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">Skipped - no email at all</span>
+                                {% endif %}
+
+                            </td>
+
+                        </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    {% endif %}
+
+    <div class="alert alert-info">
+
+        <strong>How this is different from Search Buyers:</strong>
+        Search Buyers only finds companies that show up in a search
+        engine or directory listing right now - which is why it runs dry
+        over time. This asks Gemini to name companies it already knows
+        about (the same thing as manually asking ChatGPT for a list),
+        then tries to confirm each one for real by visiting their actual
+        site. When that succeeds, you get a "Live-verified" lead. When a
+        site blocks the fetch but Gemini genuinely knows a published
+        trade email, you get an "AI-recalled, unverified" lead instead -
+        still saved, still clearly labeled either way, never disguised
+        as one when it's the other.
+
+    </div>
+
+</div>
+
+{% endblock %}

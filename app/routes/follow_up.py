@@ -1,3 +1,4 @@
+import re
 from datetime import datetime
 from pathlib import Path
 
@@ -18,6 +19,23 @@ follow_up_bp = Blueprint(
     __name__
 )
 
+EMAIL_PATTERN = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
+
+
+def _parse_extra_emails(raw):
+
+    candidates = [
+        e.strip()
+        for e in re.split(r"[,\n]+", raw or "")
+        if e.strip()
+    ]
+
+    valid = [e for e in candidates if EMAIL_PATTERN.match(e)]
+
+    invalid = [e for e in candidates if not EMAIL_PATTERN.match(e)]
+
+    return valid, invalid
+
 
 @follow_up_bp.route("/follow-up", methods=["GET", "POST"])
 def follow_up():
@@ -29,6 +47,18 @@ def follow_up():
         subject = request.form.get("subject")
 
         body = request.form.get("body")
+
+        extra_emails_raw = request.form.get("extra_emails", "")
+
+        extra_emails, invalid_emails = _parse_extra_emails(extra_emails_raw)
+
+        if invalid_emails:
+
+            flash(
+                "Skipped invalid email address(es): "
+                + ", ".join(invalid_emails),
+                "warning"
+            )
 
         attachments = request.files.getlist("attachments")
 
@@ -54,7 +84,8 @@ def follow_up():
         result = CampaignService().send_follow_up(
             subject=subject,
             body=body,
-            attachment_paths=attachment_paths
+            attachment_paths=attachment_paths,
+            extra_emails=extra_emails
         )
 
         flash(

@@ -33,15 +33,25 @@ class EmailRepository:
             EmailLog.sent_at.desc()
         ).all()
 
-    def sent_paginated(self, page=1, per_page=15):
+    def sent_paginated(self, page=1, per_page=15, email_query=None):
         """
         Returns a Flask-SQLAlchemy Pagination object of successfully
         sent emails, most recent first - used by the Sent Companies page.
+        email_query, if given, filters to receivers whose address
+        contains it (case-insensitive substring match).
         """
 
-        return EmailLog.query.filter_by(
+        query = EmailLog.query.filter_by(
             status="Sent"
-        ).order_by(
+        )
+
+        if email_query:
+
+            query = query.filter(
+                EmailLog.receiver.ilike(f"%{email_query.strip()}%")
+            )
+
+        return query.order_by(
             EmailLog.sent_at.desc()
         ).paginate(
             page=page,

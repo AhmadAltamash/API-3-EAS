@@ -21,15 +21,19 @@ def sent_companies():
     if page < 1:
         page = 1
 
+    email_query = request.args.get("q", "").strip()
+
     pagination = EmailRepository().sent_paginated(
         page=page,
-        per_page=15
+        per_page=15,
+        email_query=email_query or None
     )
 
     return render_template(
         "sent_companies.html",
         pagination=pagination,
-        logs=pagination.items
+        logs=pagination.items,
+        email_query=email_query
     )
 
 
@@ -50,6 +54,12 @@ def toggle_follow_up(buyer_id):
 
     page = request.form.get("page", 1, type=int) or 1
 
+    email_query = request.form.get("q", "")
+
     return redirect(
-        url_for("sent_companies.sent_companies", page=page)
+        url_for(
+            "sent_companies.sent_companies",
+            page=page,
+            q=email_query or None
+        )
     )

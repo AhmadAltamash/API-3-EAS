@@ -24,9 +24,10 @@
 
             <p>
 
-                Sends only to companies toggled "Yes" on the Sent Companies page.
-                Up to 6 per run, same as a regular campaign. A dated CSV of the
-                run downloads automatically when it finishes.
+                Sends to companies toggled "Yes" on the Sent Companies page,
+                plus any addresses you add manually below. Up to 6 per run,
+                same as a regular campaign. A dated CSV of the run downloads
+                automatically when it finishes.
 
             </p>
 
@@ -39,73 +40,68 @@
 
     </div>
 
-    <div class="card mb-4">
+    {% if pending_buyers %}
 
-        <div class="card-header d-flex justify-content-between align-items-center">
+        <div class="card mb-4">
 
-            <span>
-                Waiting for Follow-Up
-            </span>
+            <div class="card-header d-flex justify-content-between align-items-center">
 
-            <span class="badge {{ 'bg-success' if pending_buyers else 'bg-secondary' }}">
-                {{ pending_buyers|length }} Company{{ "" if pending_buyers|length == 1 else "ies" }}
-            </span>
+                <span>
+                    Waiting for Follow-Up
+                </span>
 
-        </div>
+                <span class="badge bg-success">
+                    {{ pending_buyers|length }} Company{{ "" if pending_buyers|length == 1 else "ies" }}
+                </span>
 
-        {% if pending_buyers %}
+            </div>
 
-        <div class="card-body p-0">
+            <div class="card-body p-0">
 
-            <div class="table-responsive">
+                <div class="table-responsive">
 
-                <table class="table align-middle mb-0">
+                    <table class="table align-middle mb-0">
 
-                    <thead>
-                        <tr>
-                            <th>Company</th>
-                            <th>Email</th>
-                            <th>Stage</th>
-                        </tr>
-                    </thead>
+                        <thead>
+                            <tr>
+                                <th>Company</th>
+                                <th>Email</th>
+                                <th>Stage</th>
+                            </tr>
+                        </thead>
 
-                    <tbody>
-                        {% for buyer in pending_buyers %}
-                        <tr>
-                            <td><strong>{{ buyer.company }}</strong></td>
-                            <td>
-                                <span class="badge bg-success">{{ buyer.email }}</span>
-                            </td>
-                            <td>{{ buyer.pipeline_stage or "-" }}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
+                        <tbody>
+                            {% for buyer in pending_buyers %}
+                            <tr>
+                                <td><strong>{{ buyer.company }}</strong></td>
+                                <td>
+                                    <span class="badge bg-success">{{ buyer.email }}</span>
+                                </td>
+                                <td>{{ buyer.pipeline_stage or "-" }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
 
-                </table>
+                    </table>
+
+                </div>
 
             </div>
 
         </div>
 
-        {% else %}
+    {% else %}
 
-        <div class="card-body text-center py-4">
+        <div class="alert alert-info mb-4">
 
-            <p class="text-muted mb-0">
-
-                Nobody's toggled "Yes" yet. Go to
-                <a href="/sent-companies">Sent Companies</a>
-                and mark a company as responded to add them here.
-
-            </p>
+            Nobody's toggled "Yes" on
+            <a href="/sent-companies">Sent Companies</a> yet — that's fine,
+            you can still send below using just the "Additional Emails"
+            field (handy for a one-off address an intern hands you).
 
         </div>
 
-        {% endif %}
-
-    </div>
-
-    {% if pending_buyers %}
+    {% endif %}
 
     <form method="POST" enctype="multipart/form-data">
 
@@ -153,6 +149,28 @@ Contact: Exportindia2026us@gmail.com</textarea>
 
         </div>
 
+        <!-- Additional recipients not in the buyer database -->
+
+        <div class="mb-3">
+
+            <label class="form-label">
+                Additional Email(s)
+            </label>
+
+            <textarea
+                class="form-control"
+                rows="3"
+                name="extra_emails"
+                placeholder="one.address@example.com, another@example.com&#10;(comma or newline separated - for addresses handed to you directly, e.g. by an intern, that aren't already in your buyer database)"
+            ></textarea>
+
+            <small class="text-muted">
+                These get added as trackable contacts and sent first, so
+                they're never the ones left out if the 6-per-run limit is hit.
+            </small>
+
+        </div>
+
         <!-- Attachment -->
 
         <div class="mb-4">
@@ -186,8 +204,6 @@ Contact: Exportindia2026us@gmail.com</textarea>
         </div>
 
     </form>
-
-    {% endif %}
 
     {% if result %}
 

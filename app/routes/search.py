@@ -16,13 +16,50 @@ def search():
 
     buyers = []
     search_summary = None
+    last_query = None
 
     if request.method == "POST":
 
-        keyword = request.form.get(
-            "keyword",
-            ""
-        ).strip()
+        # Smart Query rows submit a single ready-made "keyword" field
+        # directly (see search.html) - the structured product/city/
+        # state/country fields below are only for the main search box.
+        # A regression check just caught that these two submission
+        # shapes weren't being reconciled: every Smart Query "Run"
+        # click was silently searching for an empty string after the
+        # structured-field rework, since the route stopped reading a
+        # raw "keyword" field at all. Checking for it first fixes that.
+        raw_keyword = request.form.get("keyword", "").strip()
+
+        if raw_keyword:
+
+            keyword = raw_keyword
+
+            last_query = None
+
+        else:
+
+            product = request.form.get("product", "").strip()
+
+            city = request.form.get("city", "").strip()
+
+            state = request.form.get("state", "").strip()
+
+            country = request.form.get("country", "").strip()
+
+            # Combine the structured fields into the single keyword
+            # string the search adapters already expect - this is
+            # purely a nicer input UI, the underlying search backend
+            # is unchanged.
+            keyword = " ".join(
+                part for part in (product, city, state, country) if part
+            ).strip()
+
+            last_query = {
+                "product": product,
+                "city": city,
+                "state": state,
+                "country": country
+            }
 
         source = request.form.get(
             "source"
@@ -39,7 +76,8 @@ def search():
 
         search_summary = {
             "new": result["new_count"],
-            "duplicate": result["duplicate_count"]
+            "duplicate": result["duplicate_count"],
+            "source": source or "all"
         }
 
     smart_queries = QueryTemplateService().build_queries()
@@ -48,5 +86,6 @@ def search():
         "search.html",
         buyers=buyers,
         search_summary=search_summary,
-        smart_queries=smart_queries
+        smart_queries=smart_queries,
+        last_query=last_query
     )

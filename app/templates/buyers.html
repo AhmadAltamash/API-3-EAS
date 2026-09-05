@@ -373,6 +373,14 @@
 
                                 </span>
 
+                                {% if item.email_live_verified is sameas false %}
+
+                                    <span class="badge bg-warning text-dark" title="Not confirmed by this app - AI-recalled or manually imported">
+                                        <i class="fa-solid fa-robot"></i> Unverified
+                                    </span>
+
+                                {% endif %}
+
                             {% else %}
 
                                 <span class="badge bg-danger">
