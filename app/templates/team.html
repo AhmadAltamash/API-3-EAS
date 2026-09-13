@@ -1,0 +1,219 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container mt-4 fade-up">
+
+    <div class="hero-banner d-flex justify-content-between align-items-center">
+
+        <div>
+
+            <div class="hero-eyebrow">
+
+                <i class="fa-solid fa-users"></i>
+
+                Team
+
+            </div>
+
+            <h2>
+
+                Interns
+
+            </h2>
+
+            <p>
+
+                Track who's active, how many emails each person has sent,
+                and how many automated vs. positive responses they've
+                gotten. Updating a row ADDS to their existing totals -
+                it never overwrites what's already there.
+
+            </p>
+
+        </div>
+
+    </div>
+
+    <div class="card mb-4">
+
+        <div class="card-header">
+            Add Intern
+        </div>
+
+        <div class="card-body">
+
+            <form method="POST" action="{{ url_for('team.add_intern') }}">
+
+                <div class="row g-3 align-items-end">
+
+                    <div class="col-md-5">
+
+                        <label class="form-label">Name</label>
+
+                        <input
+                            type="text"
+                            name="name"
+                            class="form-control"
+                            placeholder="Ayush Jaiswal"
+                            required>
+
+                    </div>
+
+                    <div class="col-md-4">
+
+                        <label class="form-label">Date Joined</label>
+
+                        <input
+                            type="date"
+                            name="date_joined"
+                            class="form-control">
+
+                        <small class="text-muted">Leave blank for today.</small>
+
+                    </div>
+
+                    <div class="col-md-3">
+
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="fa-solid fa-plus me-1"></i> Add
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+    <div class="card">
+
+        <div class="card-header d-flex justify-content-between align-items-center">
+
+            <span>Team Members</span>
+
+            <span class="badge bg-secondary">{{ interns|length }} Total</span>
+
+        </div>
+
+        {% if interns %}
+
+        <div class="card-body p-0">
+
+            <div class="table-responsive">
+
+                <table class="table align-middle mb-0">
+
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Status</th>
+                            <th>Emails</th>
+                            <th>Automated</th>
+                            <th>Positive</th>
+                            <th>Joined</th>
+                            <th>Working Days</th>
+                            <th>Add Today's Numbers</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        {% for intern in interns %}
+
+                        <tr>
+
+                            <td><strong>{{ intern.name }}</strong></td>
+
+                            <td>
+
+                                <form method="POST" action="{{ url_for('team.toggle_status', intern_id=intern.id) }}" class="d-inline">
+
+                                    <button
+                                        type="submit"
+                                        class="btn btn-sm {{ 'btn-success' if intern.status == 'Active' else 'btn-outline-secondary' }}">
+
+                                        {{ intern.status }}
+
+                                    </button>
+
+                                </form>
+
+                            </td>
+
+                            <td>{{ intern.emails_sent }}</td>
+
+                            <td>{{ intern.automated_responses }}</td>
+
+                            <td>{{ intern.positive_responses }}</td>
+
+                            <td>{{ intern.date_joined.strftime("%d/%m/%Y") if intern.date_joined else "-" }}</td>
+
+                            <td>{{ intern.total_working_days }}</td>
+
+                            <td style="min-width:280px;">
+
+                                <form method="POST" action="{{ url_for('team.update_stats', intern_id=intern.id) }}" class="d-flex gap-1">
+
+                                    <input type="number" name="emails" class="form-control form-control-sm" placeholder="Emails" min="0">
+
+                                    <input type="number" name="automated" class="form-control form-control-sm" placeholder="Auto" min="0">
+
+                                    <input type="number" name="positive" class="form-control form-control-sm" placeholder="Positive" min="0">
+
+                                    <button type="submit" class="btn btn-sm btn-outline-primary text-nowrap">
+                                        <i class="fa-solid fa-plus"></i>
+                                    </button>
+
+                                </form>
+
+                            </td>
+
+                            <td>
+
+                                <form method="POST" action="{{ url_for('team.delete_intern', intern_id=intern.id) }}" class="d-inline"
+                                      onsubmit="return confirm('Remove {{ intern.name }} from the team? This cannot be undone.');">
+
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </button>
+
+                                </form>
+
+                            </td>
+
+                        </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+        {% else %}
+
+        <div class="card-body text-center py-5">
+
+            <i class="fa-solid fa-users fa-3x text-muted mb-3"></i>
+
+            <p class="text-muted mb-0">
+                No team members yet. Add your first intern above.
+            </p>
+
+        </div>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+{% endblock %}

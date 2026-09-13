@@ -6,9 +6,13 @@ from .search_result import SearchResult
 
 class GoogleSearch(BaseSearchAdapter):
 
-    def search(self, keyword):
+    # A colleague's working script tries these DDGS backends in order,
+    # falling through to the next only if the previous one raised or
+    # came back empty - meaningfully more resilient than trusting a
+    # single default backend, which is all this adapter used to do.
+    BACKENDS = ["auto", "duckduckgo", "brave", "mojeek"]
 
-        results = []
+    def search(self, keyword):
 
         # US-focused query
         query = (
@@ -16,13 +20,27 @@ class GoogleSearch(BaseSearchAdapter):
             f'"United States" OR USA OR Canada'
         )
 
+        for backend in self.BACKENDS:
+
+            results = self._search_with_backend(query, backend)
+
+            if results:
+                return results
+
+        return []
+
+    def _search_with_backend(self, query, backend):
+
+        results = []
+
         try:
 
             with DDGS() as ddgs:
 
                 search_results = ddgs.text(
                     query,
-                    max_results=30
+                    max_results=50,
+                    backend=backend
                 )
 
                 for item in search_results:
@@ -37,6 +55,6 @@ class GoogleSearch(BaseSearchAdapter):
                     )
 
         except Exception as e:
-            print(e)
+            print(f"[GoogleSearch] backend '{backend}' failed: {e}")
 
         return results

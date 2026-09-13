@@ -1,5 +1,6 @@
 from app.extensions import db
 from app.models import Buyer, Campaign, EmailLog
+from app.services.database.intern_repository import InternRepository
 
 
 class DashboardService:
@@ -53,6 +54,17 @@ class DashboardService:
             .all()
         )
 
+        interns = InternRepository().all()
+
+        intern_totals = InternRepository().totals()
+
+        intern_chart_data = {
+            "names": [i.name for i in interns],
+            "emails_sent": [i.emails_sent or 0 for i in interns],
+            "automated_responses": [i.automated_responses or 0 for i in interns],
+            "positive_responses": [i.positive_responses or 0 for i in interns],
+        }
+
         return {
 
             "total_buyers": total_buyers,
@@ -71,6 +83,10 @@ class DashboardService:
 
             "recent_campaigns": recent_campaigns,
 
-            "recent_buyers": recent_buyers
+            "recent_buyers": recent_buyers,
+
+            "intern_totals": intern_totals,
+
+            "intern_chart_data": intern_chart_data
 
         }

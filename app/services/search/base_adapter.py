@@ -8,7 +8,7 @@ class BaseSearchAdapter(ABC):
 
     def __init__(self):
 
-        self.max_results = 20
+        self.max_results = 50
 
     @abstractmethod
     def search(self, keyword):

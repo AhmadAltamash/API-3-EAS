@@ -30,6 +30,8 @@ def search():
         # raw "keyword" field at all. Checking for it first fixes that.
         raw_keyword = request.form.get("keyword", "").strip()
 
+        target_country = None
+
         if raw_keyword:
 
             keyword = raw_keyword
@@ -61,6 +63,11 @@ def search():
                 "country": country
             }
 
+            # Passed through to BuyerPipeline as a fallback ONLY for
+            # when a page gives no country signal of its own - never
+            # overrides a real, page-confirmed country.
+            target_country = country or None
+
         source = request.form.get(
             "source"
         )
@@ -69,7 +76,8 @@ def search():
 
         result = buyer_service.search_buyers(
             keyword,
-            source
+            source,
+            target_country
         )
 
         buyers = result["buyers"]

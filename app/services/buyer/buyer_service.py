@@ -23,11 +23,12 @@ class BuyerService:
     # -----------------------------
     # Search Buyers
     # -----------------------------
-    def search_buyers(self, keyword, source):
+    def search_buyers(self, keyword, source, target_country=None):
 
         buyers = self.search_manager.search(
             source,
-            keyword
+            keyword,
+            target_country
         )
 
         saved_buyers = []

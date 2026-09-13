@@ -56,6 +56,7 @@ class BuyerRepository:
             phone=buyer.phone,
             email_live_verified=getattr(buyer, "email_live_verified", None),
             product_match_percent=getattr(buyer, "product_match_percent", None),
+            country_confirmed=getattr(buyer, "country_confirmed", None),
             pipeline_stage="Discovered"
         )
 
@@ -80,6 +81,16 @@ class BuyerRepository:
 
         if incoming.country and not existing.country:
             existing.country = incoming.country
+            changed = True
+
+        # An assumed country (from search intent, country_confirmed=
+        # False) gets upgraded if a later find actually confirms it
+        # from the page itself - never the other way around.
+        incoming_country_confirmed = getattr(incoming, "country_confirmed", None)
+
+        if incoming_country_confirmed and not existing.country_confirmed:
+            existing.country = incoming.country
+            existing.country_confirmed = True
             changed = True
 
         if incoming.snippet and not existing.snippet:

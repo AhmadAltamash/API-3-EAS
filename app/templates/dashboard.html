@@ -552,6 +552,116 @@
 
 
 <!-- ==========================================
+     INTERN PERFORMANCE
+========================================== -->
+
+{% if intern_chart_data.names %}
+
+<div class="row mt-4">
+
+    <div class="col-lg-5 mb-4">
+
+        <div class="card h-100">
+
+            <div class="card-header d-flex justify-content-between align-items-center">
+
+                <span>Team Response Breakdown</span>
+
+                <a href="/team" class="small">Manage Interns &rarr;</a>
+
+            </div>
+
+            <div class="card-body">
+
+                <canvas id="internPieChart" height="220"></canvas>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="col-lg-7 mb-4">
+
+        <div class="card h-100">
+
+            <div class="card-header">
+                Emails Sent Per Intern
+            </div>
+
+            <div class="card-body">
+
+                <canvas id="internBarChart" height="220"></canvas>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+<script>
+
+    (function () {
+
+        const names = {{ intern_chart_data.names | tojson }};
+        const emailsSent = {{ intern_chart_data.emails_sent | tojson }};
+        const automated = {{ intern_chart_data.automated_responses | tojson }};
+        const positive = {{ intern_chart_data.positive_responses | tojson }};
+
+        const totalEmails = emailsSent.reduce((a, b) => a + b, 0);
+        const totalAutomated = automated.reduce((a, b) => a + b, 0);
+        const totalPositive = positive.reduce((a, b) => a + b, 0);
+        const totalNoResponse = Math.max(totalEmails - totalAutomated - totalPositive, 0);
+
+        const pieCtx = document.getElementById("internPieChart");
+
+        if (pieCtx) {
+            new Chart(pieCtx, {
+                type: "pie",
+                data: {
+                    labels: ["Positive Responses", "Automated Responses", "No Response Yet"],
+                    datasets: [{
+                        data: [totalPositive, totalAutomated, totalNoResponse],
+                        backgroundColor: ["#1f8a70", "#c98a1f", "#c0392b"]
+                    }]
+                },
+                options: {
+                    plugins: { legend: { position: "bottom" } }
+                }
+            });
+        }
+
+        const barCtx = document.getElementById("internBarChart");
+
+        if (barCtx) {
+            new Chart(barCtx, {
+                type: "bar",
+                data: {
+                    labels: names,
+                    datasets: [{
+                        label: "Emails Sent",
+                        data: emailsSent,
+                        backgroundColor: "#b5652f"
+                    }]
+                },
+                options: {
+                    scales: { y: { beginAtZero: true } },
+                    plugins: { legend: { display: false } }
+                }
+            });
+        }
+
+    })();
+
+</script>
+
+{% endif %}
+
+<!-- ==========================================
      FOURTH ROW
 ========================================== -->
 

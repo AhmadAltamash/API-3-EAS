@@ -78,6 +78,27 @@ class BuyerPipeline:
             clean_text
         )
 
+        if buyer.country in ("United States", "Canada"):
+
+            # The page itself confirmed it (a state name, "United
+            # States"/"Canada", a state abbreviation, etc) - the most
+            # trustworthy case.
+            buyer.country_confirmed = True
+
+        elif search_result.target_country in ("United States", "Canada"):
+
+            # The page gave no country signal of its own, but the
+            # search itself was scoped to a specific country - assume
+            # that instead of rejecting outright. This is a deliberate
+            # trade-off: a company's homepage very often just doesn't
+            # happen to mention its own country in a way our regex
+            # patterns catch, and rejecting every one of those throws
+            # away real, valid leads. Never silently indistinguishable
+            # from a page-confirmed one - country_confirmed=False
+            # marks exactly this case everywhere it's shown.
+            buyer.country = search_result.target_country
+            buyer.country_confirmed = False
+
         buyer = self.phone.extract(
             buyer,
             raw_html
@@ -110,7 +131,8 @@ class BuyerPipeline:
                         title=candidate_url,
                         url=candidate_url,
                         snippet=f"Found via directory listing: {search_result.title}",
-                        source=search_result.source
+                        source=search_result.source,
+                        target_country=search_result.target_country
                     )
 
                     candidate_buyer = self.process(

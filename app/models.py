@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, date
 from app.extensions import db
 
 
@@ -87,6 +87,16 @@ class Buyer(db.Model):
     # confirm - Gemini's own knowledge (AI Discovery, when the target
     # site blocks our fetcher) or a manually-curated CSV import.
     email_live_verified = db.Column(db.Boolean)
+
+    # Same honesty pattern as email_live_verified above, applied to
+    # country. True means the page itself confirmed it (a state name,
+    # "United States"/"Canada", a .us/.ca domain, etc). False means the
+    # page gave no signal at all and this was assumed from what
+    # country the search itself was scoped to - a real, useful lead,
+    # just one this app didn't independently verify. None means this
+    # predates the feature (an old row saved before this distinction
+    # existed).
+    country_confirmed = db.Column(db.Boolean)
 
     analyzed_at = db.Column(db.DateTime)
 
@@ -205,3 +215,46 @@ class PipelineActivity(db.Model):
         db.DateTime,
         default=datetime.utcnow
     )
+
+class Intern(db.Model):
+    """
+    A team member the lead is tracking outreach performance for.
+    emails_sent/automated_responses/positive_responses are running
+    totals - updated by ADDING today's numbers on top (see
+    InternRepository.append_stats), never by overwriting them.
+    total_working_days is NOT stored here - it's calculated from
+    date_joined to the current date every time it's read (see the
+    property below), so it's always correct without needing a daily
+    update job.
+    """
+
+    __tablename__ = "interns"
+
+    id = db.Column(db.Integer, primary_key=True)
+
+    name = db.Column(db.String(150), nullable=False)
+
+    status = db.Column(db.String(20), default="Active")
+
+    emails_sent = db.Column(db.Integer, default=0)
+
+    automated_responses = db.Column(db.Integer, default=0)
+
+    positive_responses = db.Column(db.Integer, default=0)
+
+    date_joined = db.Column(db.Date, nullable=False)
+
+    created_at = db.Column(
+        db.DateTime,
+        default=datetime.utcnow
+    )
+
+    @property
+    def total_working_days(self):
+
+        if not self.date_joined:
+            return 0
+
+        delta = date.today() - self.date_joined
+
+        return max(delta.days, 0)

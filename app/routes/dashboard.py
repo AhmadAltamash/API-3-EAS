@@ -29,4 +29,7 @@ def dashboard():
 
         recent_campaigns=data.get("recent_campaigns", []),
         recent_buyers=data.get("recent_buyers", []),
+
+        intern_totals=data.get("intern_totals", {}),
+        intern_chart_data=data.get("intern_chart_data", {}),
     )

@@ -22,6 +22,10 @@ already in it.
                                       and found the email itself; False =
                                       came from AI recall or a CSV import,
                                       never independently confirmed)
+  - buyers.country_confirmed        (True = the page itself confirmed the
+                                      country; False = assumed from the
+                                      search's own Country field because
+                                      the page gave no signal)
   - email_logs.website             (used by the Sent Companies page)
 
 NOTE: the app also runs this same check automatically on every startup
@@ -58,6 +62,7 @@ NEW_COLUMNS = [
     ("buyers", "pipeline_stage", "VARCHAR(50)"),
     ("buyers", "needs_follow_up", "BOOLEAN"),
     ("buyers", "email_live_verified", "BOOLEAN"),
+    ("buyers", "country_confirmed", "BOOLEAN"),
     ("email_logs", "website", "VARCHAR(300)"),
 ]
 
@@ -191,6 +196,10 @@ def main():
                 "UPDATE buyers SET email_live_verified = 0 "
                 "WHERE email_live_verified IS NULL "
                 "AND source IN ('CSV Import', 'Manual Entry')"
+            )
+            cursor.execute(
+                "UPDATE buyers SET country_confirmed = 1 "
+                "WHERE country_confirmed IS NULL"
             )
             conn.commit()
 

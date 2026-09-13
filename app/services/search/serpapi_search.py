@@ -1,3 +1,5 @@
+import time
+
 import requests
 
 from .base_adapter import BaseSearchAdapter
@@ -16,15 +18,36 @@ class SerpApiSearch(BaseSearchAdapter):
     Added as a new option in the existing Source dropdown - NOT a
     replacement for the "google"/ddgs adapter, so the two can be
     compared side by side before deciding whether to lean on this one
-    more. Fails soft (returns an empty list, never raises) on a
-    missing key, network error, or exhausted quota, exactly like every
-    other adapter here - one source having a bad day shouldn't take
+    more. Fails soft (returns an empty list, never raises) after
+    retries are exhausted - one source having a bad day shouldn't take
     down an "all sources" search.
     """
 
     ENDPOINT = "https://serpapi.com/search.json"
 
-    TIMEOUT_SECONDS = 10
+    # A long-open connection is exactly the kind of thing that gets
+    # killed mid-flight by an intermediate proxy or a hosting
+    # platform's own worker timeout (this project already has a
+    # comment elsewhere about Render worker timeouts) - keep this
+    # modest rather than generous. Same reasoning for NUM_RESULTS:
+    # asking Google to compute a much larger results page takes
+    # noticeably longer and fails more often, for free-tier accounts
+    # in particular.
+    TIMEOUT_SECONDS = 15
+
+    NUM_RESULTS = 30
+
+    MAX_RETRIES = 3
+
+    # requests/urllib3 wrap timeouts, connection resets, and DNS
+    # hiccups all under variations of "connection" errors - retrying
+    # these is worthwhile since they're often transient. A 4xx (bad
+    # key, bad request) or an API-level quota error is NOT retryable -
+    # retrying those just burns quota for the same guaranteed failure.
+    RETRYABLE_EXCEPTIONS = (
+        requests.exceptions.ConnectionError,
+        requests.exceptions.Timeout,
+    )
 
     def __init__(self, api_key=None):
 
@@ -49,35 +72,19 @@ class SerpApiSearch(BaseSearchAdapter):
             f'"United States" OR USA OR Canada'
         )
 
-        results = []
+        data = self._request_with_retry(query)
 
-        try:
-
-            response = requests.get(
-                self.ENDPOINT,
-                params={
-                    "q": query,
-                    "engine": "google",
-                    "api_key": self.api_key,
-                    "num": 30
-                },
-                timeout=self.TIMEOUT_SECONDS
-            )
-
-            response.raise_for_status()
-
-            data = response.json()
-
-        except Exception as e:
-            print(f"[SerpApiSearch] request error: {e}")
+        if data is None:
             return []
 
         # SerpApi returns HTTP 200 with an "error" field in the body
         # for things like an exhausted monthly quota or a bad key -
-        # it doesn't necessarily raise via raise_for_status() above.
+        # it doesn't necessarily raise via raise_for_status().
         if isinstance(data, dict) and data.get("error"):
             print(f"[SerpApiSearch] API error: {data['error']}")
             return []
+
+        results = []
 
         for item in data.get("organic_results", []):
 
@@ -91,3 +98,43 @@ class SerpApiSearch(BaseSearchAdapter):
             )
 
         return results
+
+    def _request_with_retry(self, query):
+
+        for attempt in range(1, self.MAX_RETRIES + 1):
+
+            try:
+
+                response = requests.get(
+                    self.ENDPOINT,
+                    params={
+                        "q": query,
+                        "engine": "google",
+                        "api_key": self.api_key,
+                        "num": self.NUM_RESULTS
+                    },
+                    timeout=self.TIMEOUT_SECONDS
+                )
+
+                response.raise_for_status()
+
+                return response.json()
+
+            except self.RETRYABLE_EXCEPTIONS as e:
+
+                print(f"[SerpApiSearch] attempt {attempt}/{self.MAX_RETRIES} - connection issue: {e}")
+
+                if attempt == self.MAX_RETRIES:
+                    return None
+
+                time.sleep(2 ** attempt)
+
+            except Exception as e:
+
+                # Not a connection issue (a 4xx, a malformed response,
+                # etc) - retrying won't help and would just burn quota
+                # on a guaranteed repeat failure.
+                print(f"[SerpApiSearch] request error (not retrying): {e}")
+                return None
+
+        return None

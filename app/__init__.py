@@ -17,6 +17,7 @@ from app.routes.catalogue import catalogue_bp
 from app.routes.follow_up import follow_up_bp
 from app.routes.discover import discover_bp
 from app.routes.import_leads import import_leads_bp
+from app.routes.team import team_bp
 
 from app.services.timezone.send_time_service import SendTimeService
 
@@ -46,6 +47,7 @@ def create_app():
     app.register_blueprint(follow_up_bp)
     app.register_blueprint(discover_bp)
     app.register_blueprint(import_leads_bp)
+    app.register_blueprint(team_bp)
 
     # Lets templates call send_time_info(country, state) directly,
     # e.g. in buyers.html to show each buyer's local/IST send window.
@@ -116,11 +118,13 @@ def _ensure_new_columns(app):
             ("pipeline_stage", "VARCHAR(50)"),
             ("needs_follow_up", "BOOLEAN"),
             ("email_live_verified", "BOOLEAN"),
+            ("country_confirmed", "BOOLEAN"),
         ]
 
         added_pipeline_stage = False
         added_needs_follow_up = False
         added_email_live_verified = False
+        added_country_confirmed = False
 
         for column_name, column_type in new_buyer_columns:
 
@@ -139,6 +143,9 @@ def _ensure_new_columns(app):
 
                 if column_name == "email_live_verified":
                     added_email_live_verified = True
+
+                if column_name == "country_confirmed":
+                    added_country_confirmed = True
 
         if added_pipeline_stage:
 
@@ -183,6 +190,24 @@ def _ensure_new_columns(app):
             ))
             db.session.commit()
             print("[schema check] Backfilled existing buyers' email_live_verified by source")
+
+        if added_country_confirmed:
+
+            # Every buyer that existed before this column was added
+            # came from the OLD strict pipeline, which only ever saved
+            # a buyer if its country was positively extracted from the
+            # page - the "assume from search intent" fallback didn't
+            # exist yet. So every pre-existing row's country genuinely
+            # was page-confirmed; backfill all of them to True rather
+            # than leaving them at NULL (which would look "unverified"
+            # in the UI when they're actually the most rigorously
+            # checked rows in the table).
+            db.session.execute(text(
+                "UPDATE buyers SET country_confirmed = 1 "
+                "WHERE country_confirmed IS NULL"
+            ))
+            db.session.commit()
+            print("[schema check] Backfilled existing buyers to country_confirmed=True")
 
     if "email_logs" in existing_tables:
 

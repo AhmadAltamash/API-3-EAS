@@ -21,7 +21,7 @@ class DirectorySearch(BaseSearchAdapter):
         "yellowpages.com",
     ]
 
-    MAX_LISTING_PAGES = 6
+    MAX_LISTING_PAGES = 15
     MAX_LINKS_PER_LISTING = 5
 
     def __init__(self):
