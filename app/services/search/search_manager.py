@@ -65,7 +65,7 @@ class SearchManager:
 
         return variations
 
-    def search(self, source, keyword, target_country=None):
+    def search(self, source, keyword, target_country=None, use_browser_fallback=False):
 
         all_results = []
 
@@ -124,8 +124,14 @@ class SearchManager:
         # BEFORE dedup/pipeline - BuyerPipeline only ever uses this as
         # a fallback when the page itself gives no country signal, and
         # always marks it as assumed rather than confirmed when it does.
+        #
+        # Also tag whether this run explicitly opted into the real-
+        # browser fallback - off unless the person checked that box,
+        # since a browser launch is much heavier than a plain fetch
+        # and shouldn't silently apply to every search.
         for result in all_results:
             result.target_country = target_country or ""
+            result.use_browser_fallback = bool(use_browser_fallback)
 
         # Remove duplicate URLs
         unique = {}

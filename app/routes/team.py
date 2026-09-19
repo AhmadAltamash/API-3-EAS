@@ -56,6 +56,64 @@ def add_intern():
     return redirect(url_for("team.team"))
 
 
+@team_bp.route("/team/<int:intern_id>/edit", methods=["GET", "POST"])
+def edit_intern(intern_id):
+
+    repo = InternRepository()
+
+    intern = repo.get(intern_id)
+
+    if not intern:
+        flash("That team member no longer exists.", "warning")
+        return redirect(url_for("team.team"))
+
+    if request.method == "POST":
+
+        name = request.form.get("name", "").strip()
+
+        date_joined_raw = request.form.get("date_joined", "").strip()
+
+        def to_int_or_none(field_name):
+
+            raw = request.form.get(field_name, "").strip()
+
+            if raw == "":
+                return None
+
+            try:
+                return int(raw)
+            except ValueError:
+                return None
+
+        date_joined = None
+
+        if date_joined_raw:
+
+            try:
+                date_joined = datetime.strptime(date_joined_raw, "%Y-%m-%d").date()
+            except ValueError:
+                flash("Invalid date format.", "warning")
+                return redirect(url_for("team.edit_intern", intern_id=intern_id))
+
+        repo.update_details(
+            intern_id,
+            name=name or None,
+            date_joined=date_joined,
+            emails_sent=to_int_or_none("emails_sent"),
+            automated_responses=to_int_or_none("automated_responses"),
+            positive_responses=to_int_or_none("positive_responses")
+        )
+
+        flash(f"Updated {name or intern.name}.", "success")
+
+        return redirect(url_for("team.team"))
+
+    return render_template(
+        "edit_intern.html",
+        intern=intern
+    )
+
+
 @team_bp.route("/team/<int:intern_id>/update-stats", methods=["POST"])
 def update_stats(intern_id):
 
@@ -95,18 +153,42 @@ def update_stats(intern_id):
     return redirect(url_for("team.team"))
 
 
-@team_bp.route("/team/<int:intern_id>/toggle-status", methods=["POST"])
-def toggle_status(intern_id):
+@team_bp.route("/team/<int:intern_id>/discontinue", methods=["POST"])
+def discontinue_intern(intern_id):
 
-    repo = InternRepository()
+    date_raw = request.form.get("date_discontinued", "").strip()
 
-    intern = repo.get(intern_id)
+    if date_raw:
+
+        try:
+            date_discontinued = datetime.strptime(date_raw, "%Y-%m-%d").date()
+        except ValueError:
+            flash("Invalid date format.", "warning")
+            return redirect(url_for("team.team"))
+
+    else:
+        date_discontinued = date.today()
+
+    intern = InternRepository().discontinue(intern_id, date_discontinued)
 
     if intern:
+        flash(
+            f"Marked {intern.name} as discontinued as of "
+            f"{date_discontinued.strftime('%d/%m/%Y')}. Their working "
+            f"days are now frozen as of that date.",
+            "success"
+        )
 
-        new_status = "Inactive" if intern.status == "Active" else "Active"
+    return redirect(url_for("team.team"))
 
-        repo.set_status(intern_id, new_status)
+
+@team_bp.route("/team/<int:intern_id>/reactivate", methods=["POST"])
+def reactivate_intern(intern_id):
+
+    intern = InternRepository().reactivate(intern_id)
+
+    if intern:
+        flash(f"{intern.name} is active again.", "success")
 
     return redirect(url_for("team.team"))
 

@@ -60,7 +60,8 @@ class BuyerPipeline:
         buyer.source = search_result.source
 
         raw_html, clean_text = self.processor.process(
-            buyer.website
+            buyer.website,
+            use_browser_fallback=search_result.use_browser_fallback
         )
 
         buyer = self.company.extract(
@@ -132,7 +133,8 @@ class BuyerPipeline:
                         url=candidate_url,
                         snippet=f"Found via directory listing: {search_result.title}",
                         source=search_result.source,
-                        target_country=search_result.target_country
+                        target_country=search_result.target_country,
+                        use_browser_fallback=search_result.use_browser_fallback
                     )
 
                     candidate_buyer = self.process(

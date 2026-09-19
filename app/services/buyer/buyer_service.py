@@ -23,12 +23,13 @@ class BuyerService:
     # -----------------------------
     # Search Buyers
     # -----------------------------
-    def search_buyers(self, keyword, source, target_country=None):
+    def search_buyers(self, keyword, source, target_country=None, use_browser_fallback=False):
 
         buyers = self.search_manager.search(
             source,
             keyword,
-            target_country
+            target_country,
+            use_browser_fallback
         )
 
         saved_buyers = []

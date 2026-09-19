@@ -4,6 +4,7 @@ from urllib.parse import urljoin
 
 from .html_fetcher import HTMLFetcher
 from .html_cleaner import HTMLCleaner
+from .playwright_fetcher import PlaywrightFetcher
 
 
 class WebsiteProcessor:
@@ -34,8 +35,9 @@ class WebsiteProcessor:
     def __init__(self):
         self.fetcher = HTMLFetcher()
         self.cleaner = HTMLCleaner()
+        self.browser_fetcher = PlaywrightFetcher()
 
-    def process(self, website):
+    def process(self, website, use_browser_fallback=False):
 
         if not website:
             return "", ""
@@ -61,6 +63,19 @@ class WebsiteProcessor:
 
             if contact_html and self.EMAIL_PATTERN.search(contact_html):
                 return contact_html, self.cleaner.clean(contact_html)
+
+        # Last resort, opt-in only: a real browser, for JS-rendered
+        # sites where the plain HTTP fetch above got back an empty
+        # shell (a homepage's raw HTML with no email and no useful
+        # contact links to follow is exactly what that looks like).
+        # Never reached unless the search explicitly asked for it -
+        # see the class docstring in PlaywrightFetcher for why.
+        if use_browser_fallback:
+
+            rendered_html = self.browser_fetcher.fetch(website)
+
+            if rendered_html and self.EMAIL_PATTERN.search(rendered_html):
+                return rendered_html, self.cleaner.clean(rendered_html)
 
         return homepage_html, self.cleaner.clean(homepage_html)
 

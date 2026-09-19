@@ -72,12 +72,15 @@ def search():
             "source"
         )
 
+        use_browser_fallback = request.form.get("use_browser_fallback") == "on"
+
         buyer_service = BuyerService()
 
         result = buyer_service.search_buyers(
             keyword,
             source,
-            target_country
+            target_country,
+            use_browser_fallback
         )
 
         buyers = result["buyers"]

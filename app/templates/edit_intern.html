@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="container mt-4 fade-up">
+
+    <div class="hero-banner d-flex justify-content-between align-items-center">
+
+        <div>
+
+            <div class="hero-eyebrow">
+
+                <i class="fa-solid fa-pen"></i>
+
+                Edit
+
+            </div>
+
+            <h2>
+
+                {{ intern.name }}
+
+            </h2>
+
+            <p>
+
+                This directly replaces whatever you enter here - use it to
+                fix a mistake, not to log today's numbers (for that, use
+                the "Add Today's Numbers" row on the Interns page instead,
+                which adds on top rather than overwriting).
+
+            </p>
+
+        </div>
+
+        <a href="/team" class="btn btn-outline-light">
+            <i class="fa-solid fa-arrow-left me-2"></i>
+            Back to Interns
+        </a>
+
+    </div>
+
+    <div class="card">
+
+        <div class="card-body">
+
+            <form method="POST">
+
+                <div class="row g-3">
+
+                    <div class="col-md-6">
+
+                        <label class="form-label">Name</label>
+
+                        <input
+                            type="text"
+                            name="name"
+                            class="form-control"
+                            value="{{ intern.name }}"
+                            required>
+
+                    </div>
+
+                    <div class="col-md-6">
+
+                        <label class="form-label">Date Joined</label>
+
+                        <input
+                            type="date"
+                            name="date_joined"
+                            class="form-control"
+                            value="{{ intern.date_joined.strftime('%Y-%m-%d') if intern.date_joined else '' }}">
+
+                    </div>
+
+                    <div class="col-md-4">
+
+                        <label class="form-label">Total Emails Sent</label>
+
+                        <input
+                            type="number"
+                            name="emails_sent"
+                            class="form-control"
+                            min="0"
+                            value="{{ intern.emails_sent }}">
+
+                    </div>
+
+                    <div class="col-md-4">
+
+                        <label class="form-label">Total Automated Responses</label>
+
+                        <input
+                            type="number"
+                            name="automated_responses"
+                            class="form-control"
+                            min="0"
+                            value="{{ intern.automated_responses }}">
+
+                    </div>
+
+                    <div class="col-md-4">
+
+                        <label class="form-label">Total Positive Responses</label>
+
+                        <input
+                            type="number"
+                            name="positive_responses"
+                            class="form-control"
+                            min="0"
+                            value="{{ intern.positive_responses }}">
+
+                    </div>
+
+                </div>
+
+                <div class="mt-4 d-flex gap-2">
+
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fa-solid fa-check me-1"></i> Save Changes
+                    </button>
+
+                    <a href="/team" class="btn btn-secondary">Cancel</a>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

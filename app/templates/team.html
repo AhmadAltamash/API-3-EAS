@@ -26,8 +26,11 @@
 
                 Track who's active, how many emails each person has sent,
                 and how many automated vs. positive responses they've
-                gotten. Updating a row ADDS to their existing totals -
-                it never overwrites what's already there.
+                gotten. The "Add Today's Numbers" row ADDS to existing
+                totals - it never overwrites. Use the pencil icon instead
+                to directly fix a mistake (wrong name, wrong count).
+                Marking someone Discontinued freezes their working-days
+                count as of the date you give it.
 
             </p>
 
@@ -129,19 +132,47 @@
 
                             <td><strong>{{ intern.name }}</strong></td>
 
-                            <td>
+                            <td style="min-width:220px;">
 
-                                <form method="POST" action="{{ url_for('team.toggle_status', intern_id=intern.id) }}" class="d-inline">
+                                {% if intern.status == "Active" %}
 
-                                    <button
-                                        type="submit"
-                                        class="btn btn-sm {{ 'btn-success' if intern.status == 'Active' else 'btn-outline-secondary' }}">
+                                    <form method="POST" action="{{ url_for('team.discontinue_intern', intern_id=intern.id) }}" class="d-flex gap-1 align-items-center">
 
-                                        {{ intern.status }}
+                                        <span class="badge bg-success">Active</span>
 
-                                    </button>
+                                        <input
+                                            type="date"
+                                            name="date_discontinued"
+                                            class="form-control form-control-sm"
+                                            title="Date discontinued - leave blank for today">
 
-                                </form>
+                                        <button type="submit" class="btn btn-sm btn-outline-danger text-nowrap" title="Mark discontinued">
+                                            <i class="fa-solid fa-user-slash"></i>
+                                        </button>
+
+                                    </form>
+
+                                {% else %}
+
+                                    <div>
+
+                                        <span class="badge bg-secondary">Discontinued</span>
+
+                                        <div class="text-muted small">
+                                            since {{ intern.date_discontinued.strftime("%d/%m/%Y") if intern.date_discontinued else "-" }}
+                                        </div>
+
+                                        <form method="POST" action="{{ url_for('team.reactivate_intern', intern_id=intern.id) }}" class="d-inline">
+
+                                            <button type="submit" class="btn btn-sm btn-outline-success mt-1">
+                                                <i class="fa-solid fa-rotate-left me-1"></i> Reactivate
+                                            </button>
+
+                                        </form>
+
+                                    </div>
+
+                                {% endif %}
 
                             </td>
 
@@ -153,7 +184,15 @@
 
                             <td>{{ intern.date_joined.strftime("%d/%m/%Y") if intern.date_joined else "-" }}</td>
 
-                            <td>{{ intern.total_working_days }}</td>
+                            <td>
+
+                                {{ intern.total_working_days }}
+
+                                {% if intern.status != "Active" %}
+                                    <div class="text-muted small">frozen</div>
+                                {% endif %}
+
+                            </td>
 
                             <td style="min-width:280px;">
 
@@ -175,14 +214,22 @@
 
                             <td>
 
-                                <form method="POST" action="{{ url_for('team.delete_intern', intern_id=intern.id) }}" class="d-inline"
-                                      onsubmit="return confirm('Remove {{ intern.name }} from the team? This cannot be undone.');">
+                                <div class="d-flex gap-1">
 
-                                    <button type="submit" class="btn btn-sm btn-outline-danger">
-                                        <i class="fa-solid fa-trash"></i>
-                                    </button>
+                                    <a href="{{ url_for('team.edit_intern', intern_id=intern.id) }}" class="btn btn-sm btn-outline-secondary" title="Edit / fix a mistake">
+                                        <i class="fa-solid fa-pen"></i>
+                                    </a>
 
-                                </form>
+                                    <form method="POST" action="{{ url_for('team.delete_intern', intern_id=intern.id) }}" class="d-inline"
+                                          onsubmit="return confirm('Remove {{ intern.name }} from the team? This cannot be undone.');">
+
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">
+                                            <i class="fa-solid fa-trash"></i>
+                                        </button>
+
+                                    </form>
+
+                                </div>
 
                             </td>
 

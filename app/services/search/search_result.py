@@ -19,3 +19,9 @@ class SearchResult:
     # page-confirmed country, and is always tagged as assumed rather
     # than confirmed when used.
     target_country: str = ""
+
+    # Optional - whether this search explicitly opted into the real-
+    # browser (Playwright) fallback for pages that come back empty
+    # under a plain HTTP fetch. Off by default - see PlaywrightFetcher
+    # and the "Also try a real browser" checkbox on the Search page.
+    use_browser_fallback: bool = False

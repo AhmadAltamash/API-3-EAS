@@ -244,6 +244,13 @@ class Intern(db.Model):
 
     date_joined = db.Column(db.Date, nullable=False)
 
+    # Set only when status is "Discontinued" - the specific day the
+    # lead says this person stopped, which may not be today (e.g.
+    # backfilling someone who left last week). Once set,
+    # total_working_days freezes as of this date instead of
+    # continuing to grow with today's date.
+    date_discontinued = db.Column(db.Date)
+
     created_at = db.Column(
         db.DateTime,
         default=datetime.utcnow
@@ -255,6 +262,8 @@ class Intern(db.Model):
         if not self.date_joined:
             return 0
 
-        delta = date.today() - self.date_joined
+        end_date = self.date_discontinued or date.today()
+
+        delta = end_date - self.date_joined
 
         return max(delta.days, 0)

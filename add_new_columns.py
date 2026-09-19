@@ -27,6 +27,9 @@ already in it.
                                       search's own Country field because
                                       the page gave no signal)
   - email_logs.website             (used by the Sent Companies page)
+  - interns.date_discontinued      (set when a team member is marked
+                                     Discontinued - freezes their working-
+                                     days count as of that date)
 
 NOTE: the app also runs this same check automatically on every startup
 (see _ensure_new_columns in app/__init__.py), using its own database
@@ -64,6 +67,7 @@ NEW_COLUMNS = [
     ("buyers", "email_live_verified", "BOOLEAN"),
     ("buyers", "country_confirmed", "BOOLEAN"),
     ("email_logs", "website", "VARCHAR(300)"),
+    ("interns", "date_discontinued", "DATE"),
 ]
 
 

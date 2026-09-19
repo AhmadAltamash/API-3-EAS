@@ -220,6 +220,17 @@ def _ensure_new_columns(app):
             db.session.commit()
             print("[schema check] Added missing column: email_logs.website")
 
+    if "interns" in existing_tables:
+
+        intern_columns = {c["name"] for c in inspector.get_columns("interns")}
+
+        if "date_discontinued" not in intern_columns:
+            db.session.execute(text(
+                "ALTER TABLE interns ADD COLUMN date_discontinued DATE"
+            ))
+            db.session.commit()
+            print("[schema check] Added missing column: interns.date_discontinued")
+
     # catalogue_profile is a brand new table (not an existing one gaining
     # a column), so db.create_all() already creates it - nothing to do
     # here for it specifically.
