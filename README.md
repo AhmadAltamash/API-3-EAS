@@ -103,7 +103,7 @@ Provides campaign insights including:
 - Campaign history
 - Email statistics
 - Delivery performance
-- Success metric
+- Success metrics
 
 ---
 
