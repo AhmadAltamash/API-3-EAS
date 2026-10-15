@@ -5,9 +5,11 @@ from flask import flash
 from flask import redirect
 from flask import render_template
 from flask import request
+from flask import send_file
 from flask import url_for
 
 from app.services.database.intern_repository import InternRepository
+from app.services.export.export_service import ExportService
 
 
 team_bp = Blueprint(
@@ -21,9 +23,32 @@ def team():
 
     repo = InternRepository()
 
+    search = request.args.get("q", "").strip()
+
+    status_filter = request.args.get("status", "").strip()
+
     return render_template(
         "team.html",
-        interns=repo.all()
+        interns=repo.all(status_filter=status_filter or None, search=search or None),
+        current_search=search,
+        current_status_filter=status_filter
+    )
+
+
+@team_bp.route("/team/export-csv", methods=["GET"])
+def export_csv():
+
+    interns = InternRepository().active_only()
+
+    csv_file = ExportService().intern_csv(interns)
+
+    timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+
+    return send_file(
+        csv_file,
+        mimetype="text/csv",
+        as_attachment=True,
+        download_name=f"interns_{timestamp}.csv"
     )
 
 
@@ -49,7 +74,13 @@ def add_intern():
     else:
         date_joined = date.today()
 
-    InternRepository().create(name, date_joined)
+    product_assigned = request.form.get("product_assigned", "").strip() or None
+
+    InternRepository().create(
+        name,
+        date_joined,
+        product_assigned=product_assigned
+    )
 
     flash(f"Added {name} to the team.", "success")
 
@@ -101,7 +132,8 @@ def edit_intern(intern_id):
             date_joined=date_joined,
             emails_sent=to_int_or_none("emails_sent"),
             automated_responses=to_int_or_none("automated_responses"),
-            positive_responses=to_int_or_none("positive_responses")
+            positive_responses=to_int_or_none("positive_responses"),
+            product_assigned=request.form.get("product_assigned", "").strip()
         )
 
         flash(f"Updated {name or intern.name}.", "success")

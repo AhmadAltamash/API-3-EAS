@@ -30,6 +30,8 @@ already in it.
   - interns.date_discontinued      (set when a team member is marked
                                      Discontinued - freezes their working-
                                      days count as of that date)
+  - interns.product_assigned       (free-text: what they're currently
+                                     assigned to search/crawl for)
 
 NOTE: the app also runs this same check automatically on every startup
 (see _ensure_new_columns in app/__init__.py), using its own database
@@ -68,6 +70,7 @@ NEW_COLUMNS = [
     ("buyers", "country_confirmed", "BOOLEAN"),
     ("email_logs", "website", "VARCHAR(300)"),
     ("interns", "date_discontinued", "DATE"),
+    ("interns", "product_assigned", "VARCHAR(255)"),
 ]
 
 

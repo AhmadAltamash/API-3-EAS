@@ -50,7 +50,7 @@
 
                 <div class="row g-3 align-items-end">
 
-                    <div class="col-md-5">
+                    <div class="col-md-3">
 
                         <label class="form-label">Name</label>
 
@@ -63,7 +63,7 @@
 
                     </div>
 
-                    <div class="col-md-4">
+                    <div class="col-md-3">
 
                         <label class="form-label">Date Joined</label>
 
@@ -76,7 +76,19 @@
 
                     </div>
 
-                    <div class="col-md-3">
+                    <div class="col-md-4">
+
+                        <label class="form-label">Product Assigned</label>
+
+                        <input
+                            type="text"
+                            name="product_assigned"
+                            class="form-control"
+                            placeholder="e.g. Candle Holders - Texas">
+
+                    </div>
+
+                    <div class="col-md-2">
 
                         <button type="submit" class="btn btn-primary w-100">
                             <i class="fa-solid fa-plus me-1"></i> Add
@@ -92,13 +104,73 @@
 
     </div>
 
+    <div class="card mb-4">
+
+        <div class="card-body">
+
+            <form method="GET" class="d-flex gap-2 flex-wrap align-items-end">
+
+                <div>
+
+                    <label class="form-label small text-muted mb-1">Search by name</label>
+
+                    <input
+                        type="text"
+                        name="q"
+                        value="{{ current_search }}"
+                        class="form-control"
+                        style="min-width:220px;"
+                        placeholder="Search interns...">
+
+                </div>
+
+                <div>
+
+                    <label class="form-label small text-muted mb-1">Status</label>
+
+                    <select name="status" class="form-select">
+
+                        <option value="" {{ "selected" if not current_status_filter else "" }}>All (Active first)</option>
+
+                        <option value="Active" {{ "selected" if current_status_filter == "Active" else "" }}>Active only</option>
+
+                        <option value="Discontinued" {{ "selected" if current_status_filter == "Discontinued" else "" }}>Discontinued only</option>
+
+                    </select>
+
+                </div>
+
+                <button type="submit" class="btn btn-primary">
+                    <i class="fa-solid fa-filter me-1"></i> Apply
+                </button>
+
+                {% if current_search or current_status_filter %}
+
+                    <a href="{{ url_for('team.team') }}" class="btn btn-outline-secondary">Clear</a>
+
+                {% endif %}
+
+                <a href="{{ url_for('team.export_csv') }}" class="btn btn-outline-success ms-auto">
+                    <i class="fa-solid fa-file-csv me-1"></i> Download CSV
+                </a>
+
+            </form>
+
+            <small class="text-muted d-block mt-2">
+                The CSV download always includes Active members only, regardless of the filter above.
+            </small>
+
+        </div>
+
+    </div>
+
     <div class="card">
 
         <div class="card-header d-flex justify-content-between align-items-center">
 
             <span>Team Members</span>
 
-            <span class="badge bg-secondary">{{ interns|length }} Total</span>
+            <span class="badge bg-secondary">{{ interns|length }} Shown</span>
 
         </div>
 
@@ -114,6 +186,7 @@
                         <tr>
                             <th>Name</th>
                             <th>Status</th>
+                            <th>Product Assigned</th>
                             <th>Emails</th>
                             <th>Automated</th>
                             <th>Positive</th>
@@ -172,6 +245,16 @@
 
                                     </div>
 
+                                {% endif %}
+
+                            </td>
+
+                            <td>
+
+                                {% if intern.product_assigned %}
+                                    {{ intern.product_assigned }}
+                                {% else %}
+                                    <span class="text-muted small">Unassigned</span>
                                 {% endif %}
 
                             </td>
@@ -251,9 +334,19 @@
 
             <i class="fa-solid fa-users fa-3x text-muted mb-3"></i>
 
-            <p class="text-muted mb-0">
-                No team members yet. Add your first intern above.
-            </p>
+            {% if current_search or current_status_filter %}
+
+                <p class="text-muted mb-0">
+                    No team members match that search/filter.
+                </p>
+
+            {% else %}
+
+                <p class="text-muted mb-0">
+                    No team members yet. Add your first intern above.
+                </p>
+
+            {% endif %}
 
         </div>
 

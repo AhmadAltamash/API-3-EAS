@@ -236,6 +236,12 @@ class Intern(db.Model):
 
     status = db.Column(db.String(20), default="Active")
 
+    # Free-text - what this person is currently assigned to search/
+    # crawl for (e.g. "Candle Holders - Texas", "Wholesale Lanterns").
+    # Purely informational for the lead's own tracking; doesn't drive
+    # any actual search behavior on its own.
+    product_assigned = db.Column(db.String(255))
+
     emails_sent = db.Column(db.Integer, default=0)
 
     automated_responses = db.Column(db.Integer, default=0)

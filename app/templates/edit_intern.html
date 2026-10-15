@@ -73,6 +73,24 @@
 
                     </div>
 
+                    <div class="col-12">
+
+                        <label class="form-label">Product Assigned</label>
+
+                        <input
+                            type="text"
+                            name="product_assigned"
+                            class="form-control"
+                            placeholder="e.g. Candle Holders - Texas"
+                            value="{{ intern.product_assigned or '' }}">
+
+                        <small class="text-muted">
+                            What this person is currently assigned to search/crawl for.
+                            Leave blank to unassign.
+                        </small>
+
+                    </div>
+
                     <div class="col-md-4">
 
                         <label class="form-label">Total Emails Sent</label>
